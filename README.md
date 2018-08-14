@@ -239,7 +239,7 @@ coding and writing should be done by the project members.  Students who submit
 unattributed material will be found in violation of the Honor code (see
 Academic Integrity below).
 
-## Late policy and Resubmission
+## Late Policy and Resubmission
 
 The first grade for any assignment will be based on the material available at
 the due date: if nothing has been submitted, the first grade is 0.
@@ -253,6 +253,9 @@ Please be aware that grades for this course are due on December 17, 2018 at
 12:00 PM.  To allow for sufficient time to grade all assignments, all
 resubmissions that will be considered must be received by **December 13, 2018
 at 11:50 PM, EST**.
+
+Of course, extenuating circumstances and hardships will occur, which I will be
+happy to discuss on a case-by-case basis.
 
 ## Textbooks and Reading
 
