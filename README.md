@@ -252,7 +252,7 @@ The final grade will be the maximum of the two grades.
 Please be aware that grades for this course are due on December 17, 2018 at
 12:00 PM.  To allow for sufficient time to grade all assignments, all
 resubmissions that will be considered must be received by **December 13, 2018
-at 11:50 PM, EST**.
+at 11:59 PM, EST**.
 
 Of course, extenuating circumstances and hardships will occur, which I will be
 happy to discuss on a case-by-case basis.
