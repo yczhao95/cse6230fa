@@ -1,0 +1,5 @@
+
+*.o
+*.optrpt
+fma_prof
+fma_prof_opt
