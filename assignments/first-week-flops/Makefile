@@ -40,8 +40,9 @@ fma_prof: fma_prof.o fma_omp.o fma_loop_host.o libfma_cuda.so
 fma_prof_opt: fma_prof.o fma_omp.o fma_loop_host_opt.o libfma_cuda_opt.so
 	$(LINKER) -o $@ $^
 
-N = $(shell echo $$(( $(PBS_NP) * 256 )))
-T = 67108864
+Nh = $(shell echo $$(( $(PBS_NP) * 256 )))
+Nd = 256
+T = 1048576
 b = 0.5
 c = 3.0
 
@@ -49,8 +50,8 @@ PERF = perf stat -v
 OMPENV = OMP_PROC_BIND=spread OMP_NUM_THREADS=$(PBS_NP)
 
 run_fma_prof: fma_prof fma_prof_opt
-	$(OMPENV) $(PERF) ./fma_prof $(N) $(T) $(b) $(c)
-	$(OMPENV) $(PERF) ./fma_prof_opt $(N) $(T) $(b) $(c)
+	$(OMPENV) $(PERF) ./fma_prof $(Nh) $(Nd) $(T) $(b) $(c)
+	$(OMPENV) $(PERF) ./fma_prof_opt $(Nh) $(Nd) $(T) $(b) $(c)
 
 clean:
 	$(RM) *.o *.optrpt *.so fma_prof fma_prof_opt

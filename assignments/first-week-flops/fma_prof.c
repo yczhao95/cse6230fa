@@ -13,7 +13,7 @@
 int
 main (int argc, char **argv)
 {
-  int N, T;
+  int Nh, Nd, T;
   float *ah = NULL;
   float b, c;
   float **ad = NULL;
@@ -21,37 +21,41 @@ main (int argc, char **argv)
   int err;
 
   /* input processing */
-  if (argc != 5) {
-    printf ("Usage: %s ARRAY_SIZE LOOP_COUNT b c\n", argv[0]);
+  if (argc != 6) {
+    printf ("Usage: %s HOST_ARRAY_SIZE DEV_ARRAY_SIZE LOOP_COUNT b c\n", argv[0]);
     return 1;
   }
-  N = atoi (argv[1]);
-  if (N < 0) {
-    printf ("ARRAY_SIZE negative\n");
+  Nh = atoi (argv[1]);
+  if (Nh < 0) {
+    printf ("HOST_ARRAY_SIZE negative\n");
     return 1;
   }
-  T = atoi (argv[2]);
+  Nd = atoi (argv[2]);
+  if (Nd < 0) {
+    printf ("DEV_ARRAY_SIZE negative\n");
+    return 1;
+  }
+  T = atoi (argv[3]);
   if (T < 0) {
     printf ("LOOP_COUNT negative\n");
     return 1;
   }
-  b = atof (argv[3]);
-  c = atof (argv[4]);
+  b = atof (argv[4]);
+  c = atof (argv[5]);
 
   /* initialize the array */
-  err = fma_dev_initialize (N, T, &numDevices, &ad); CHK (err);
-  err = fma_host_initialize (N, T, &ah); CHK (err);
+  err = fma_dev_initialize (Nd, T, &numDevices, &ad); CHK (err);
+  err = fma_host_initialize (Nh, T, &ah); CHK (err);
 
-  err = fma_dev_start (N, T, numDevices, ad, b, c); CHK (err);
-  err = fma_host_start (N, T, ah, b, c); CHK (err);
-  err = fma_dev_end (N, T, numDevices, ad, b, c); CHK (err);
-  err = fma_host_end (N, T, ah, b, c); CHK (err);
+  err = fma_dev_start (Nd, T, numDevices, ad, b, c); CHK (err);
+  err = fma_host_start (Nh, T, ah, b, c); CHK (err);
+  err = fma_dev_end (Nd, T, numDevices, ad, b, c); CHK (err);
+  err = fma_host_end (Nh, T, ah, b, c); CHK (err);
 
-
-  printf ("\n[%s]: %zu flops executed\n\n", argv[0], (size_t) N * (size_t) T * 2);
+  printf ("\n[%s]: %zu flops executed\n\n", argv[0], (size_t) (Nh + Nd * numDevices) * (size_t) T * 2);
 
   /* clean up */
-  err = fma_host_free (N, T, &ah);  CHK (err);
-  err = fma_dev_free (N, T, &numDevices, &ad);  CHK (err);
+  err = fma_host_free (Nh, T, &ah);  CHK (err);
+  err = fma_dev_free (Nd, T, &numDevices, &ad);  CHK (err);
   return 0;
 }
