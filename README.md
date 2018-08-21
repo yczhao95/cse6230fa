@@ -252,7 +252,7 @@ The final grade will be the maximum of the two grades.
 Please be aware that grades for this course are due on December 17, 2018 at
 12:00 PM.  To allow for sufficient time to grade all assignments, all
 resubmissions that will be considered must be received by **December 13, 2018
-at 11:50 PM, EST**.
+at 11:59 PM, EST**.
 
 Of course, extenuating circumstances and hardships will occur, which I will be
 happy to discuss on a case-by-case basis.
@@ -269,7 +269,7 @@ Excellent resources include:
 * __Introduction to Parallel Computing__, by Grama et al.,
   Addison-Wesley, 2003. Available online via the Georgia Tech Library's
   website:
-  [www](http://proquest.safaribooksonline.com.www.library.gatech.edu:2048/book/software-engineering-and-development/0201648652)
+  [www](http://proquest.safaribooksonline.com/0-201-64865-2)
 * Victor Eijkhout's [HPC book and course](https://bitbucket.org/VictorEijkhout/hpc-book-and-course/src/default/)
 
 ## Academic Integrity
