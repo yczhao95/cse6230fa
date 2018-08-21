@@ -11,7 +11,6 @@ int
 main (int argc, char **argv)
 {
   int N, T;
-  int num_threads;
   float *a = NULL, b, c;
 
   /* input processing */
@@ -48,32 +47,33 @@ main (int argc, char **argv)
     }
   }
 
-#if defined(_OPENMP)
-  num_threads = omp_get_num_threads();
-#else
-  num_threads = 1;
-#endif
-
-#pragma omp parallel
+  #pragma omp parallel
   {
-    int my_thread;
+    int num_threads, my_thread;
     int my_start, my_end;
     int my_N;
 
 #if defined(_OPENMP)
     my_thread = omp_get_thread_num();
+    num_threads = omp_get_num_threads();
 #else
     my_thread = 0;
+    num_threads = 1;
 #endif
 
+    /* get thread intervals */
     my_start = ((size_t) my_thread * (size_t) N) / (size_t) num_threads;
     my_end   = ((size_t) (my_thread + 1) * (size_t) N) / (size_t) num_threads;
     my_N     = my_end - my_start;
+#if 0
+    printf ("[%d/%d]: [%d, %d)\n", my_thread, num_threads, my_start, my_end);
+#endif
+
     /* execute the loop */
     fma_loop (my_N, T, &a[my_start], b, c);
   }
 
-  printf ("%zu flops executed\n", (size_t) N * (size_t) T * 2);
+  printf ("\n[%s]: %zu flops executed\n\n", argv[0], (size_t) N * (size_t) T * 2);
 
   /* clean up */
   free (a);
