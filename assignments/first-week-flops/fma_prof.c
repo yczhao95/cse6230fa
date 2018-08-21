@@ -5,13 +5,20 @@
 #if defined(_OPENMP)
 #include <omp.h>
 #endif
-#include "fma_loop.h"
+#include "fma_omp.h"
+#include "fma_cuda.h"
+
+#define CHK(err) do {if (err) {fprintf(stderr, "[%s, %d] Top level error\n", __FILE__, __LINE__); return err;}} while (0)
 
 int
 main (int argc, char **argv)
 {
   int N, T;
-  float *a = NULL, b, c;
+  float *ah = NULL;
+  float b, c;
+  float **ad = NULL;
+  int numDevices = 0;
+  int err;
 
   /* input processing */
   if (argc != 5) {
@@ -32,50 +39,19 @@ main (int argc, char **argv)
   c = atof (argv[4]);
 
   /* initialize the array */
-  if (!N) {
-    a = NULL;
-  }
-  else {
-    a = (float *) malloc (N * sizeof (float));
-    if (!a) {
-      printf ("Failed to allocate a\n");
-      return 1;
-    }
-    #pragma omp parallel for schedule(static)
-    for (int i = 0; i < N; i++) {
-      a[i] = (float) i;
-    }
-  }
+  err = fma_dev_initialize (N, T, &numDevices, &ad); CHK (err);
+  err = fma_host_initialize (N, T, &ah); CHK (err);
 
-  #pragma omp parallel
-  {
-    int num_threads, my_thread;
-    int my_start, my_end;
-    int my_N;
+  err = fma_dev_start (N, T, numDevices, ad, b, c); CHK (err);
+  err = fma_host_start (N, T, ah, b, c); CHK (err);
+  err = fma_dev_end (N, T, numDevices, ad, b, c); CHK (err);
+  err = fma_host_end (N, T, ah, b, c); CHK (err);
 
-#if defined(_OPENMP)
-    my_thread = omp_get_thread_num();
-    num_threads = omp_get_num_threads();
-#else
-    my_thread = 0;
-    num_threads = 1;
-#endif
-
-    /* get thread intervals */
-    my_start = ((size_t) my_thread * (size_t) N) / (size_t) num_threads;
-    my_end   = ((size_t) (my_thread + 1) * (size_t) N) / (size_t) num_threads;
-    my_N     = my_end - my_start;
-#if 0
-    printf ("[%d/%d]: [%d, %d)\n", my_thread, num_threads, my_start, my_end);
-#endif
-
-    /* execute the loop */
-    fma_loop (my_N, T, &a[my_start], b, c);
-  }
 
   printf ("\n[%s]: %zu flops executed\n\n", argv[0], (size_t) N * (size_t) T * 2);
 
   /* clean up */
-  free (a);
+  err = fma_host_free (N, T, &ah);  CHK (err);
+  err = fma_dev_free (N, T, &numDevices, &ad);  CHK (err);
   return 0;
 }

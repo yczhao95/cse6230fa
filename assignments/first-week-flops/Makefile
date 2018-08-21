@@ -4,19 +4,38 @@ all: fma_prof fma_prof_opt
 CC = icc
 COPTFLAGS = -O3 -xHost -qopt-report=5
 OMPFLAGS = -qopenmp
-CFLAGS = -g -Wall -std=c99
-CPPFLAGS =
-LIBS = -l
+CFLAGS = -g -Wall -std=c99 -fPIC
+CPPFLAGS = -I$(CUDAROOT)/include
+CULIBS = -L$(CUDAROOT)/lib64 -lcudart
+NVCC = nvcc -ccbin=icpc -cudart=static
+NVCCFLAGS = -G -Xcompiler '-fPIC'
+NVCCOPTFLAGS = 
 RM = rm -f
+LINKER = icpc $(OMPFLAGS)
 
 %.o: %.c
 	$(CC) $(CFLAGS) $(COPTFLAGS) $(CPPFLAGS) $(OMPFLAGS) -c -o $@ $<
 
-fma_prof: fma_prof.o fma_loop.o
-	$(CC) $(OMPFLAGS) -o $@ $^
+%.link.o: %.o
+	$(NVCC) -dlink -o $@ $< -lcudadevrt
 
-fma_prof_opt: fma_prof.o fma_loop_opt.o
-	$(CC) $(OMPFLAGS) -o $@ $^
+%.o: %.cu
+	$(NVCC) $(NVCCFLAGS) $(NVCCOPTFLAGS) -dc -o $@ $<
+
+fma_cuda_link.o: fma_cuda.o fma_loop_dev.o
+	$(NVCC) $(NVCCFLAGS) -dlink  $^ -o $@
+
+libfma_cuda.so: fma_cuda_link.o fma_cuda.o fma_loop_dev.o
+	$(LINKER) -shared -Wl,-soname,libfma_cuda.so -o $@ $^ $(CULIBS)
+
+libfma_cuda_opt.so: fma_cuda.o fma_loop_dev_opt.o
+	$(NVCC) -lib $^ -o $@
+
+fma_prof: fma_prof.o fma_omp.o fma_loop_host.o libfma_cuda.so
+	$(LINKER) -o $@ fma_prof.o fma_omp.o fma_loop_host.o -L. -ldl -Wl,-rpath,. -lfma_cuda $(CULIBS) 
+
+fma_prof_opt: fma_prof.o fma_omp.o fma_loop_host_opt.o libfma_cuda_opt.so
+	$(LINKER) -o $@ $^ $(LIBS)
 
 N = $(shell echo $$(( $(PBS_NP) * 256 )))
 T = 67108864
@@ -31,6 +50,6 @@ run_fma_prof: fma_prof fma_prof_opt
 	$(OMPENV) $(PERF) ./fma_prof_opt $(N) $(T) $(b) $(c)
 
 clean:
-	$(RM) *.o *.optrpt fma_prof fma_prof_opt
+	$(RM) *.o *.optrpt *.so fma_prof fma_prof_opt
 
 .PHONY: clean run_fma_prof
