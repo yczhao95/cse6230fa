@@ -1,4 +1,4 @@
-# CSE 6320 (Fall 2017, 3 Credit Hours) | High Performance Parallel Computing: Tools and Applications
+# CSE 6230 (Fall 2017, 3 Credit Hours) | High Performance Parallel Computing: Tools and Applications
 
 ## Contact
 
