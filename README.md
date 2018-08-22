@@ -7,10 +7,8 @@
 | *name*   | Toby Isaac                                          | Zhihang Liu                                                 |
 | *email*  | [tisaac@cc.gatech.edu](mailto:tisaac@cc.gatech.edu) | [zliu354@gatech.edu](zliu354@gatech.edu)                    |
 | *phone*  | [(404)385-5970](tel:+14043855970)                   |                                                             |
-| *office* | [KACB 1302](https://goo.gl/38x6QB)                  |                                                             |
-| *hours*  | **Take the [poll][oh-poll]**                        | **Take the [poll][oh-poll]**                                |
-
-[oh-poll]:https://goo.gl/forms/NdIBoIk9Dv1dftzF3
+| *office* | [KACB 1302](https://goo.gl/38x6QB)                  | [KACB CSE Common Area](https://goo.gl/38x6QB)                                                           |
+| *hours*  | Mondays 3-4, Fridays 10-11                          | Wednesdays 1-2
 
 ## Websites
 
