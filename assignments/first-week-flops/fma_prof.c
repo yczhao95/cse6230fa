@@ -19,14 +19,15 @@ main (int argc, char **argv)
   float **ad = NULL;
   int numDevices = 0;
   int err;
+  int blocksize=-1;
 #if defined(_OPENMP)
   double time_start, time_end, time_diff;
 #endif
   size_t num_flops;
 
   /* input processing */
-  if (argc != 6) {
-    printf ("Usage: %s HOST_ARRAY_SIZE DEV_ARRAY_SIZE LOOP_COUNT b c\n", argv[0]);
+  if (argc != 7) {
+    printf ("Usage: %s HOST_ARRAY_SIZE DEV_ARRAY_SIZE DEV_BLOCK_SIZE LOOP_COUNT b c\n", argv[0]);
     return 1;
   }
   Nh = atoi (argv[1]);
@@ -39,13 +40,22 @@ main (int argc, char **argv)
     printf ("DEV_ARRAY_SIZE negative\n");
     return 1;
   }
-  T = atoi (argv[3]);
+  blocksize = atoi (argv[3]);
+  T = atoi (argv[4]);
   if (T < 0) {
     printf ("LOOP_COUNT negative\n");
     return 1;
   }
-  b = atof (argv[4]);
-  c = atof (argv[5]);
+  b = atof (argv[5]);
+  c = atof (argv[6]);
+
+  if (blocksize > 0) {
+    printf ("[%s] Nh = %d, Nd = %d, T = %d, block size = %d\n", argv[0], Nh, Nd, T, blocksize);
+  }
+  else {
+    printf ("[%s] Nh = %d, Nd = %d, T = %d, default block size\n", argv[0], Nh, Nd, T);
+  }
+
 
   /* initialize the array */
   err = fma_dev_initialize (Nd, T, &numDevices, &ad); CHK (err);
@@ -54,20 +64,20 @@ main (int argc, char **argv)
 #if defined (_OPENMP)
   time_start = omp_get_wtime();
 #endif
-  err = fma_dev_start (Nd, T, numDevices, ad, b, c); CHK (err);
+  err = fma_dev_start (Nd, T, blocksize, numDevices, ad, b, c); CHK (err);
   err = fma_host_start (Nh, T, ah, b, c); CHK (err);
   err = fma_dev_end (Nd, T, numDevices, ad, b, c); CHK (err);
   err = fma_host_end (Nh, T, ah, b, c); CHK (err);
 #if defined (_OPENMP)
   time_end = omp_get_wtime();
   time_diff = time_end - time_start;
-  printf ("\n[%s]: %e elapsed seconds\n\n", argv[0], time_diff);
+  printf ("[%s]: %e elapsed seconds\n", argv[0], time_diff);
 #endif
 
   num_flops = (size_t) (Nh + Nd * numDevices) * (size_t) T * 2;
-  printf ("\n[%s]: %zu flops executed\n\n", argv[0], num_flops);
+  printf ("[%s]: %zu flops executed\n", argv[0], num_flops);
 #if defined (_OPENMP)
-  printf ("\n[%s]: %e flop/s\n\n", argv[0], (double) num_flops / time_diff);
+  printf ("[%s]: %e flop/s\n", argv[0], (double) num_flops / time_diff);
 #endif
 
   /* clean up */

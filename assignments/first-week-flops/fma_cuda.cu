@@ -26,7 +26,6 @@ fma_dev_initialize (int N, int T, int *numDevices, float ***a)
   cudaError_t cerr;
 
   cerr = cudaGetDeviceCount (numDevices); CUDA_CHK(cerr);
-  printf ("numDevices %d\n", *numDevices);
   if (*numDevices) {
     aa = (float **) malloc (*numDevices * sizeof (float *));
     if (!aa) {
@@ -65,7 +64,7 @@ fma_dev_free (int N, int T, int *numDevices, float ***a)
 }
 
 int
-fma_dev_start (int N, int T, int numDevices, float **a, float b, float c)
+fma_dev_start (int N, int T, int blocksize, int numDevices, float **a, float b, float c)
 {
   cudaError_t cerr;
 
@@ -74,8 +73,13 @@ fma_dev_start (int N, int T, int numDevices, float **a, float b, float c)
     int block, grid;
 
     cerr = cudaSetDevice(i); CUDA_CHK(cerr);
-    cerr = cudaGetDeviceProperties (&prop, i); CUDA_CHK(cerr);
-    block = prop.maxThreadsPerBlock;
+    if (blocksize < 0) {
+      cerr = cudaGetDeviceProperties (&prop, i); CUDA_CHK(cerr);
+      block = prop.maxThreadsPerBlock;
+    }
+    else {
+      block = blocksize;
+    }
     grid = (N + block - 1) / block;
     fma_loop_dev<<<grid, block>>>(N, T, a[i], b, c);
   }
