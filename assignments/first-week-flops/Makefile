@@ -7,9 +7,10 @@ OMPFLAGS = -qopenmp
 CFLAGS = -g -Wall -std=c99 -fPIC
 CPPFLAGS = -I$(CUDAROOT)/include
 CULIBS = -L$(CUDAROOT)/lib64 -Wl,-rpath,$(CUDAROOT)/lib64 -lcudart
+LIBS = $(CULIBS)
 NVCC = nvcc -ccbin=icpc
 NVCCFLAGS = -G -Xcompiler '-fPIC'
-NVCCOPTFLAGS = 
+CUOPTFLAGS = 
 RM = rm -f
 LINKER = icpc $(OMPFLAGS)
 
@@ -20,7 +21,7 @@ LINKER = icpc $(OMPFLAGS)
 	$(NVCC) -dlink -o $@ $< -lcudadevrt
 
 %.o: %.cu
-	$(NVCC) $(NVCCFLAGS) $(NVCCOPTFLAGS) -dc -o $@ $<
+	$(NVCC) $(NVCCFLAGS) $(CUOPTFLAGS) -dc -o $@ $<
 
 fma_cuda_link.o: fma_cuda.o fma_loop_dev.o
 	$(NVCC) $(NVCCFLAGS) -dlink  $^ -o $@
@@ -29,10 +30,10 @@ fma_cuda_link_opt.o: fma_cuda.o fma_loop_dev_opt.o
 	$(NVCC) $(NVCCFLAGS) -dlink  $^ -o $@
 
 libfma_cuda.so: fma_cuda_link.o fma_cuda.o fma_loop_dev.o
-	$(LINKER) -shared -Wl,-soname,libfma_cuda.so -o $@ $^ $(CULIBS)
+	$(LINKER) -shared -Wl,-soname,libfma_cuda.so -o $@ $^ $(LIBS)
 
 libfma_cuda_opt.so: fma_cuda_link_opt.o fma_cuda.o fma_loop_dev_opt.o
-	$(LINKER) -shared -Wl,-soname,libfma_cuda_opt.so -o $@ $^ $(CULIBS)
+	$(LINKER) -shared -Wl,-soname,libfma_cuda_opt.so -o $@ $^ $(LIBS)
 
 fma_prof: fma_prof.o fma_omp.o fma_loop_host.o libfma_cuda.so
 	$(LINKER) -o $@ $^

@@ -19,6 +19,10 @@ main (int argc, char **argv)
   float **ad = NULL;
   int numDevices = 0;
   int err;
+#if defined(_OPENMP)
+  double time_start, time_end, time_diff;
+#endif
+  size_t num_flops;
 
   /* input processing */
   if (argc != 6) {
@@ -47,12 +51,24 @@ main (int argc, char **argv)
   err = fma_dev_initialize (Nd, T, &numDevices, &ad); CHK (err);
   err = fma_host_initialize (Nh, T, &ah); CHK (err);
 
+#if defined (_OPENMP)
+  time_start = omp_get_wtime();
+#endif
   err = fma_dev_start (Nd, T, numDevices, ad, b, c); CHK (err);
   err = fma_host_start (Nh, T, ah, b, c); CHK (err);
   err = fma_dev_end (Nd, T, numDevices, ad, b, c); CHK (err);
   err = fma_host_end (Nh, T, ah, b, c); CHK (err);
+#if defined (_OPENMP)
+  time_end = omp_get_wtime();
+  time_diff = time_end - time_start;
+  printf ("\n[%s]: %e elapsed seconds\n\n", argv[0], time_diff);
+#endif
 
-  printf ("\n[%s]: %zu flops executed\n\n", argv[0], (size_t) (Nh + Nd * numDevices) * (size_t) T * 2);
+  num_flops = (size_t) (Nh + Nd * numDevices) * (size_t) T * 2;
+  printf ("\n[%s]: %zu flops executed\n\n", argv[0], num_flops);
+#if defined (_OPENMP)
+  printf ("\n[%s]: %e flop/s\n\n", argv[0], (double) num_flops / time_diff);
+#endif
 
   /* clean up */
   err = fma_host_free (Nh, T, &ah);  CHK (err);
