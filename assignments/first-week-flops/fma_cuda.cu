@@ -23,8 +23,19 @@ int
 fma_dev_initialize (int N, int T, int *numDevices, float ***a)
 {
   float **aa = NULL;
+  int runtimeVersion;
+  int driverVersion;
   cudaError_t cerr;
 
+  cerr = cudaRuntimeGetVersion (&runtimeVersion);
+  if (cerr == cudaErrorInsufficientDriver) {
+    *numDevices = 0;
+    *a = NULL;
+    return 0;
+  }
+  CUDA_CHK(cerr);
+  cerr = cudaDriverGetVersion (&driverVersion); CUDA_CHK(cerr);
+  printf ("Runtime %d driver %d\n", runtimeVersion, driverVersion);
   cerr = cudaGetDeviceCount (numDevices); CUDA_CHK(cerr);
   if (*numDevices) {
     aa = (float **) malloc (*numDevices * sizeof (float *));
