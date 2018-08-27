@@ -20,14 +20,15 @@ main (int argc, char **argv)
   int numDevices = 0;
   int err;
   int blocksize=-1;
+  int gridsize=-1;
 #if defined(_OPENMP)
   double time_start, time_end, time_diff;
 #endif
   size_t num_flops;
 
   /* input processing */
-  if (argc != 7) {
-    printf ("Usage: %s HOST_ARRAY_SIZE DEV_ARRAY_SIZE DEV_BLOCK_SIZE LOOP_COUNT b c\n", argv[0]);
+  if (argc != 8) {
+    printf ("Usage: %s HOST_ARRAY_SIZE DEV_ARRAY_SIZE DEV_BLOCK_SIZE DEV_GRID_SIZE LOOP_COUNT b c\n", argv[0]);
     return 1;
   }
   Nh = atoi (argv[1]);
@@ -41,13 +42,14 @@ main (int argc, char **argv)
     return 1;
   }
   blocksize = atoi (argv[3]);
-  T = atoi (argv[4]);
+  gridsize = atoi (argv[4]);
+  T = atoi (argv[5]);
   if (T < 0) {
     printf ("LOOP_COUNT negative\n");
     return 1;
   }
-  b = atof (argv[5]);
-  c = atof (argv[6]);
+  b = atof (argv[6]);
+  c = atof (argv[7]);
 
   if (blocksize > 0) {
     printf ("[%s] Nh = %d, Nd = %d, T = %d, block size = %d\n", argv[0], Nh, Nd, T, blocksize);
@@ -64,7 +66,7 @@ main (int argc, char **argv)
 #if defined (_OPENMP)
   time_start = omp_get_wtime();
 #endif
-  err = fma_dev_start (Nd, T, blocksize, numDevices, ad, b, c); CHK (err);
+  err = fma_dev_start (Nd, T, blocksize, gridsize, numDevices, ad, b, c); CHK (err);
   err = fma_host_start (Nh, T, ah, b, c); CHK (err);
   err = fma_dev_end (Nd, T, numDevices, ad, b, c); CHK (err);
   err = fma_host_end (Nh, T, ah, b, c); CHK (err);

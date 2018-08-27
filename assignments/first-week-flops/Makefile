@@ -47,15 +47,16 @@ T = 1048576
 b = 0.5
 c = 3.0
 Bs = -1
+Gs = -1
 
 PERF =
 OMPENV = OMP_PROC_BIND=spread OMP_NUM_THREADS=$(PBS_NP)
 
 run_fma_prof: fma_prof
-	$(OMPENV) $(PERF) ./fma_prof $(Nh) $(Nd) $(Bs) $(T) $(b) $(c)
+	$(OMPENV) $(PERF) ./fma_prof $(Nh) $(Nd) $(Bs) $(Gs) $(T) $(b) $(c)
 
 run_fma_prof_opt: fma_prof fma_prof_opt
-	$(OMPENV) $(PERF) ./fma_prof_opt $(Nh) $(Nd) $(Bs) $(T) $(b) $(c)
+	$(OMPENV) $(PERF) ./fma_prof_opt $(Nh) $(Nd) $(Bs) $(Gs) $(T) $(b) $(c)
 
 clean:
 	$(RM) *.o *.optrpt *.so fma_prof fma_prof_opt

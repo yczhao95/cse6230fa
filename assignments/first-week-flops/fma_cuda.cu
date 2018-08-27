@@ -80,7 +80,7 @@ fma_dev_free (int N, int T, int *numDevices, float ***a)
 }
 
 int
-fma_dev_start (int N, int T, int blocksize, int numDevices, float **a, float b, float c)
+fma_dev_start (int N, int T, int blocksize, int gridsize, int numDevices, float **a, float b, float c)
 {
   cudaError_t cerr;
 
@@ -89,14 +89,19 @@ fma_dev_start (int N, int T, int blocksize, int numDevices, float **a, float b, 
     int block, grid;
 
     cerr = cudaSetDevice(i); CUDA_CHK(cerr);
-    if (blocksize < 0) {
+    if (blocksize <= 0) {
       cerr = cudaGetDeviceProperties (&prop, i); CUDA_CHK(cerr);
       block = prop.maxThreadsPerBlock;
     }
     else {
       block = blocksize;
     }
-    grid = (N + block - 1) / block;
+    if (gridsize <= 0) {
+      grid = (N + block - 1) / block;
+    }
+    else {
+      grid = gridsize;
+    }
     fma_loop_dev<<<grid, block>>>(N, T, a[i], b, c);
   }
   return 0;
