@@ -2,6 +2,9 @@
 #PBS -q coc-ice
 #PBS -j oe
 
+module use ${CSE6230_DIR}/modulefiles
+module load cse6230
+
 JNPORT=`hexdump -e '"%u"' -n 2 /dev/urandom | awk '{printf ($0 % 2000) + 8000}'`
 logfile=${PBS_O_WORKDIR}/${PBS_JOBNAME}.${PBS_JOBID%.ice-sched.pace.gatech.edu}.log
 host=${HOSTNAME%.pace.gatech.edu}
