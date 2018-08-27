@@ -9,7 +9,7 @@ CPPFLAGS = -I$(CUDAROOT)/include
 CULIBS = -L$(CUDAROOT)/lib64 -Wl,-rpath,$(CUDAROOT)/lib64 -lcudart
 LIBS = $(CULIBS)
 NVCC = nvcc -ccbin=icpc
-NVCCFLAGS = -G -Xcompiler '-fPIC'
+NVCCFLAGS = -Xcompiler '-fPIC'
 CUOPTFLAGS = 
 RM = rm -f
 LINKER = icpc $(OMPFLAGS)

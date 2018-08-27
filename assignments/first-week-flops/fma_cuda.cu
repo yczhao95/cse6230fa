@@ -27,6 +27,11 @@ fma_dev_initialize (int N, int T, int *numDevices, float ***a)
   int driverVersion;
   cudaError_t cerr;
 
+  if (!N) {
+    *numDevices = 0;
+    *a = NULL;
+    return 0;
+  }
   cerr = cudaRuntimeGetVersion (&runtimeVersion);
   if (cerr == cudaErrorInsufficientDriver) {
     *numDevices = 0;
