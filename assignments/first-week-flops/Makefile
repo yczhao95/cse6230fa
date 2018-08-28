@@ -36,10 +36,10 @@ libfma_cuda_opt.so: fma_cuda_link_opt.o fma_cuda.o fma_loop_dev_opt.o
 	$(LINKER) -shared -Wl,-soname,libfma_cuda_opt.so -o $@ $^ $(LIBS)
 
 fma_prof: fma_prof.o fma_omp.o fma_loop_host.o libfma_cuda.so
-	$(LINKER) -o $@ $^
+	$(LINKER) -o $@ $^ -Wl,-rpath,.
 
 fma_prof_opt: fma_prof.o fma_omp.o fma_loop_host_opt.o libfma_cuda_opt.so
-	$(LINKER) -o $@ $^
+	$(LINKER) -o $@ $^ -Wl,-rpath,.
 
 Nh = $(shell echo $$(( $(PBS_NP) * 256 )))
 Nd = 256
