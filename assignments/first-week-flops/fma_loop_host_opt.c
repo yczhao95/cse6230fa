@@ -18,9 +18,9 @@
 void
 fma_loop_host (int N, int T, float *a, float b, float c)
 {
-  for (int i = 0; i < N; i++) {
-    for (int j = 0; j < T; j++) {
-      a[i] = a[i] * b + c;
-    }
-  }
+	for (int j = 0; j < T; j++) {
+		for (int i = 0; i < N; i++) {
+			a[i] = a[i] * b + c;
+		}
+	}
 }

@@ -1,0 +1,34 @@
+---------------------------------------
+Begin PBS Prologue Wed Aug 29 14:26:57 EDT 2018
+Job ID:     14752.ice-sched.pace.gatech.edu
+User ID:    yzhao492
+Job name:   jupyter
+Queue:      coc-ice
+End PBS Prologue Wed Aug 29 14:26:57 EDT 2018
+---------------------------------------
+ =========================================================================
+|                                                                         |
+|       A note about python/3.6:                                          |
+|       PACE is lacking the staff to install all of the python 3          |
+|       modules, but we do maintain an anaconda distribution for          |
+|       both python 2 and python 3. As conda significantly reduces        |
+|       the overhead with package management, we would much prefer        |
+|       to maintain python 3 through anaconda.                            |
+|                                                                         |
+|       All pace installed modules are visible via the module avail       |
+|       command.                                                          |
+|                                                                         |
+ =========================================================================
+[C 14:26:58.026 NotebookApp] No such file or directory: /nv/coc-ice/yzhao492/2
+---------------------------------------
+Begin PBS Epilogue Wed Aug 29 14:26:58 EDT 2018
+Job ID:     14752.ice-sched.pace.gatech.edu
+User ID:    yzhao492
+Job name:   jupyter
+Resources:  walltime=00:30:00
+Rsrc Used:  cput=00:00:00,energy_used=0,mem=0kb,vmem=0kb,walltime=00:00:01
+Queue:      coc-ice
+Nodes:     
+rich133-k33-17.pace.gatech.edu
+End PBS Epilogue Wed Aug 29 14:27:12 EDT 2018
+---------------------------------------

@@ -1,0 +1,6 @@
+To connect to your notebook, run the following command on your laptop/workstation:
+
+ssh -t -L 8178:localhost:8178 yzhao492@coc-ice.pace.gatech.edu ssh -L 8178:localhost:8178 rich133-k33-17
+
+Do not close the terminal where that is running, and open the address below in your browser:
+
