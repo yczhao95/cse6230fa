@@ -5,6 +5,9 @@
 #include <math.h>
 #include "cloud.h"
 #include "verlet.h"
+#if defined(_OPENMP)
+#include <omp.h>
+#endif
 
 #define PI 3.1415926535897932384626433832795L
 
@@ -70,28 +73,33 @@ int
 main (int argc, char **argv)
 {
   int Np, Nt, err;
-  int Nint, s;
+  int Nint;
   real_t dt;
   real_t *x, *y, *z, *u, *v, *w;
   real_t *Hin, *Hout;
   const char *basename = NULL;
+#if defined(_OPENMP)
+  double time_start, time_end, time_diff;
+#endif
 
-  if (argc != 4 && argc != 6) {
-    printf ("Usage: %s NUM_POINTS NUM_STEPS DT [OUTPUT_FREQ OUTPUT_BASENAME]\n", argv[0]);
+  if (argc < 4 || argc > 6) {
+    printf ("Usage: %s NUM_POINTS NUM_STEPS DT [NCHUNK OUTPUT_BASENAME]\n", argv[0]);
     return 1;
   }
   Np = atoi (argv[1]);
   Nt = atoi (argv[2]);
   dt = (real_t) atof (argv[3]);
-  if (argc == 6) {
+  if (argc >= 5) {
     Nint = atoi (argv[4]);
-    basename = argv[5];
+    if (argc == 6) {
+      basename = argv[5];
+    }
   }
   else {
-    Nint = Nt;
+    Nint = 1;
   }
 
-  printf ("%s, NUM_POINTS=%d, NUM_STEPS=%d, DT=%g\n", argv[0], Np, Nt, dt);
+  printf ("%s, NUM_POINTS=%d, NUM_STEPS=%d, DT=%g, NCHUNK=%d\n", argv[0], Np, Nt, dt, Nint);
 
   err = safeMALLOC (Np * sizeof (real_t), &x);CHK(err);
   err = safeMALLOC (Np * sizeof (real_t), &y);CHK(err);
@@ -102,7 +110,18 @@ main (int argc, char **argv)
   err = safeMALLOC (Np * sizeof (real_t), &Hin);CHK(err);
   err = safeMALLOC (Np * sizeof (real_t), &Hout);CHK(err);
 
-  for (int i = 0; i < Np; i++) { /* make some orbits that are visually appealing */
+  #pragma omp parallel for schedule(static)
+  for (int i = 0; i < Np; i++) {
+    x[i] = 0.;
+    y[i] = 0.;
+    z[i] = 0.;
+    u[i] = 0.;
+    v[i] = 0.;
+    w[i] = 0.;
+  }
+
+  /* make some orbits that are visually appealing */
+  for (int i = 0; i < Np; i++) {
     real_t e, p, theta, inc, Omega, omicr;
     real_t r, x_hat, y_hat, u_hat, v_hat;
     real_t sininc, cosinc, sinOmg, cosOmg, sinomc, cosomc;
@@ -153,19 +172,60 @@ main (int argc, char **argv)
   compute_hamiltonian (Np, Hin, x, y, z, u, v, w);
   memcpy (Hout, Hin, Np * sizeof (real_t));
 
-  for (s = 0; s < Nt; s += Nint) {
-    if (basename) {err = write_step (Np, s / Nint, basename, x, y, z, Hout);CHK(err);}
-    verlet_step (Np, Nint, dt, x, y, z, u, v, w);
-    compute_hamiltonian (Np, Hout, x, y, z, u, v, w);
-  }
-  if (basename) {
-    err = write_step (Np, s / Nint, basename, x, y, z, Hout);CHK(err);
-  }
+#if defined (_OPENMP)
+  time_start = omp_get_wtime();
+#endif
+#pragma omp parallel
+  {
+    int num_threads, my_thread;
+    int my_start, my_end;
+    int my_N;
 
+#if defined(_OPENMP)
+    my_thread = omp_get_thread_num();
+    num_threads = omp_get_num_threads();
+#else
+    my_thread = 0;
+    num_threads = 1;
+#endif
+
+    /* get thread intervals */
+    my_start = ((size_t) my_thread * (size_t) Np) / (size_t) num_threads;
+    my_end   = ((size_t) (my_thread + 1) * (size_t) Np) / (size_t) num_threads;
+    my_N     = my_end - my_start;
+#if 0
+#pragma omp critical
+    {
+      printf ("[%d/%d]: [%d, %d)\n", my_thread, num_threads, my_start, my_end);
+    }
+#endif
+    for (int s = 0; s < Nt; s += Nint) {
+#pragma omp master
+      if (basename) {write_step (Np, s / Nint, basename, x, y, z, Hout);}
+
+
+      /* execute the loop */
+      verlet_step (my_N, Nint, dt, &x[my_start], &y[my_start], &z[my_start],
+          &u[my_start], &v[my_start], &w[my_start]);
+#if 0
+      compute_hamiltonian (Np, Hout, x, y, z, u, v, w);
+#endif
+    }
+  }
+#if defined (_OPENMP)
+  time_end = omp_get_wtime();
+  time_diff = time_end - time_start;
+  printf ("[%s]: %e elapsed seconds\n", argv[0], time_diff);
+  printf ("[%s]: %e particle time steps per second\n", argv[0], (size_t) Np * (size_t) Nt / time_diff);
+  printf ("[%s]: %e particle time step chunks per second\n", argv[0], (size_t) Np * (size_t) Nt / (Nint * time_diff));
+#endif
+
+#if 0
   printf ("Hamiltonian relative error:\n");
   for (int i = 0; i < Np; i++) {
     printf ("[%d]: %g\n", i, fabs (Hout[i] - Hin[i]) / fabs (Hin[i]));
   }
+#endif
 
   free (Hout);
   free (Hin);

@@ -2,6 +2,11 @@
 #include "cloud.h"
 #include "verlet.h"
 
+
+#if !defined(NT)
+#define NT Nt
+#endif
+
 void
 verlet_step (int Np, int Nt, real_t dt,
              real_t *restrict x, real_t *restrict y, real_t *restrict z,
@@ -17,7 +22,7 @@ verlet_step (int Np, int Nt, real_t dt,
     real_t v_t = v[i];
     real_t w_t = w[i];
 
-    for (int j = 0; j < Nt; j++) {
+    for (int j = 0; j < NT; j++) {
       real_t r2_t, r_t, ir3_t, ax_t_dt, ay_t_dt, az_t_dt;
 
       /* half update position using existing velocity and acceleration */
