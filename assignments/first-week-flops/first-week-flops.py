@@ -55,11 +55,10 @@ get_ipython().run_cell_magic('bash', '', 'pace-check-queue coc-ice')
 # * The job should begin in the CSE6230 directory.
 # * The job should end after 30 minutes.
 
-# In[13]:
+# In[30]:
 
 
-# put one qsub command in this cell, and duplicate the cell for the others
-qsub -I -X -q coc-ice -l nodes=1:ppn=4:gpus=1,walltime=00:30:00 -d $CSE6230_DIR
+get_ipython().run_cell_magic('bash', '', 'qsub -I -X -q coc-ice -l nodes=1:ppn=4:gpus=1,walltime=00:30:00 -d $CSE6230_DIR')
 
 
 # ## What have we got to work with?
@@ -73,24 +72,16 @@ qsub -I -X -q coc-ice -l nodes=1:ppn=4:gpus=1,walltime=00:30:00 -d $CSE6230_DIR
 # 
 # **Compute node exercise 1 (1 pt):** Using bash scripting (`awk`, `grep`, `sed`) or any other tool you like (you could, e.g., write a python script in a separate file and call it, as long as you `git add` it), set the following variables so that the printout that follows is correct.  You script should be correct on any type of compute node.
 
-# In[9]:
+# In[27]:
 
 
-CPU_NAME=cat /proc/cpuinfo | grep -oP 'model name\s:\s\K.*' | head -1
-CORE_COUNT=cat /proc/cpuinfo | grep 'model name' | wc -l
-GPU_NAME=nvidia-smi --query-gpu=gpu_name --format=csv | grep -v name| uniq
-GPU_COUNT=nvidia-smi --query-gpu=gpu_name --format=csv | grep -v name| wc -l
+get_ipython().run_cell_magic('bash', '', "CPU_NAME=`cat /proc/cpuinfo | grep -oP 'model name\\s:\\s\\K.*' | head -1`\nCORE_COUNT=`cat /proc/cpuinfo | grep 'model name' | wc -l`\nGPU_NAME=`nvidia-smi --query-gpu=gpu_name --format=csv | grep -v name| uniq`\nGPU_COUNT=`nvidia-smi --query-gpu=gpu_name --format=csv | grep -v name| wc -l`")
 
 
-# In[7]:
+# In[25]:
 
 
-echo "This nodes has ${CORE_COUNT} cores: its architecture is (Manufacturer, Product Id) ${CPU_NAME}"
-if [[ ! $GPU_COUNT || $GPU_COUNT == 0 ]] ;  then
-    echo "This node has no GPUs"
-else
-    echo "This node has ${GPU_COUNT} GPUs: its/their architecture is (Manufacturer, Product Id) ${GPU_NAME}"
-fi
+get_ipython().run_cell_magic('bash', '', 'echo "This nodes has ${CORE_COUNT} cores: its architecture is (Manufacturer, Product Id) ${CPU_NAME}"\nif [[ ! $GPU_COUNT || $GPU_COUNT == 0 ]] ;  then\n    echo "This node has no GPUs"\nelse\n    echo "This node has ${GPU_COUNT} GPUs: its/their architecture is (Manufacturer, Product Id) ${GPU_NAME}"\nfi')
 
 
 # **Compute node exercise 2 (1 pt):** After you have logged out of the compute node, use whatever resources published on the web you can find to estimate the peak single precision flop/s of this node (you only need to do this step for one of the types of nodes, not all of them).
@@ -121,10 +112,10 @@ fi
 # - Experiment with the merits of putting more weight on `Nh` and `Nd` vs more weight on `T`.
 # - You can also choose to pass the option `Bs=X` to control the thread block size for the GPU, where `X` is a power of 2 between 64 and 2048.
 
-# In[3]:
+# In[28]:
 
 
-make run_fma_prof Nh=256 Nd=256 T=256 COPTFLAGS='-O -xHost' CUOPTFLAGS='-O' # modify this for peak flop/s
+get_ipython().run_cell_magic('bash', '', "make run_fma_prof Nh=256 Nd=256 T=256 COPTFLAGS='-O -xHost' CUOPTFLAGS='-O' # modify this for peak flop/s")
 
 
 # **Compute Node Exercise 4 (2 pts):** Now let's see if we can make any transformations to the code to make a difference.

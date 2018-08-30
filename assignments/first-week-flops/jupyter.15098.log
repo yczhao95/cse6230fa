@@ -1,0 +1,17 @@
+To connect to your notebook, run the following command on your laptop/workstation:
+
+ssh -t -L 9226:localhost:9226 yzhao492@coc-ice.pace.gatech.edu ssh -L 9226:localhost:9226 rich133-k33-17
+
+Do not close the terminal where that is running, and open the address below in your browser:
+
+[I 02:52:39.286 NotebookApp] Serving notebooks from local directory: /nv/coc-ice/yzhao492
+[I 02:52:39.286 NotebookApp] The Jupyter Notebook is running at:
+[I 02:52:39.286 NotebookApp] http://localhost:9226/?token=6185e497f9d1eb6f2f4b4536bcb10efdf5be157cb33abd76
+[I 02:52:39.287 NotebookApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+[C 02:52:39.287 NotebookApp] 
+    
+    Copy/paste this URL into your browser when you connect for the first time,
+    to login with a token:
+        http://localhost:9226/?token=6185e497f9d1eb6f2f4b4536bcb10efdf5be157cb33abd76
+[C 02:56:45.852 NotebookApp] received signal 15, stopping
+[I 02:56:45.854 NotebookApp] Shutting down 0 kernels
