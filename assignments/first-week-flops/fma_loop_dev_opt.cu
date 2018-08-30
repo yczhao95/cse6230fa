@@ -9,6 +9,7 @@ fma_loop_dev (int N, int T, float *a, float b, float c)
   int num_threads = gridDim.x * blockDim.x;
 
   for (int i = my_thread; i < N; i+= num_threads) {
+	#pragma unroll (8)
     for (int j = 0; j < T; j++) {
       a[i] = a[i] * b + c;
     }

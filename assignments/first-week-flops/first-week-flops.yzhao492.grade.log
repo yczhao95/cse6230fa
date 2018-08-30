@@ -51,15 +51,71 @@ rich133-s42-26     0/8     0.0     1.2      1365/131128     1.0    Yes (free)
 rich133-s42-27     0/8     0.0     0.4      1629/131128     1.2    Yes (free)             
 rich133-s42-28     0/8     0.0     3.5      1369/131128     1.0    Yes (free)             
 + qsub -I -X -q coc-ice -l nodes=1:ppn=4:gpus=1,walltime=00:30:00 -d /nv/coc-ice/yzhao492/cse6230 -x /nv/coc-ice/yzhao492/cse6230/assignments/first-week-flops/first-week-flops-compute.sh
-[qsub: DISPLAY not set]
+qsub: waiting for job 15100.ice-sched.pace.gatech.edu to start
+qsub: job 15100.ice-sched.pace.gatech.edu ready
 
-usage: qsub [-a date_time] [-A account_string] [-b secs]
-    [-c [ none | { enabled | periodic | shutdown |
-    depth=<int> | dir=<path> | interval=<minutes>}... ]
-    [-C directive_prefix] [-d path] [-D path]
-    [-e path] [-h] [-I] [-j oe|eo|n] [-k {oe}] [-l resource_list] [-m n|{abe}]
-    [-M user_list] [-N jobname] [-o path] [-p priority] [-P proxy_user [-J <jobid]]
-    [-q queue] [-r y|n] [-S path] [-t number_to_submit] [-T type]  [-u user_list]
-    [-w] path
-      [-W additional_attributes] [-v variable_list] [-V ] [-x] [-X] [-z] [script]
+---------------------------------------
+Begin PBS Prologue Thu Aug 30 03:05:32 EDT 2018
+Job ID:     15100.ice-sched.pace.gatech.edu
+User ID:    yzhao492
+Job name:   first-week-flops-compute.sh
+Queue:      coc-ice
+End PBS Prologue Thu Aug 30 03:05:32 EDT 2018
+---------------------------------------
+ =========================================================================
+|                                                                         |
+|       A note about python/3.6:                                          |
+|       PACE is lacking the staff to install all of the python 3          |
+|       modules, but we do maintain an anaconda distribution for          |
+|       both python 2 and python 3. As conda significantly reduces        |
+|       the overhead with package management, we would much prefer        |
+|       to maintain python 3 through anaconda.                            |
+|                                                                         |
+|       All pace installed modules are visible via the module avail       |
+|       command.                                                          |
+|                                                                         |
+ =========================================================================
+This nodes has 8 cores: its architecture is (Manufacturer, Product Id) Intel(R) Xeon(R) CPU E5-2623 v4 @ 2.60GHz
+This node has 2 GPUs: its/their architecture is (Manufacturer, Product Id) Tesla P100-PCIE-16GB
+icc -g -Wall -std=c99 -fPIC -O -xHost -I/usr/local/pacerepov1/cuda/8.0.44/include -qopenmp -c -o fma_prof.o fma_prof.c
+icc -g -Wall -std=c99 -fPIC -O -xHost -I/usr/local/pacerepov1/cuda/8.0.44/include -qopenmp -c -o fma_omp.o fma_omp.c
+icc -g -Wall -std=c99 -fPIC -O -xHost -I/usr/local/pacerepov1/cuda/8.0.44/include -qopenmp -c -o fma_loop_host.o fma_loop_host.c
+nvcc -ccbin=icpc -Xcompiler '-fPIC' -O -dc -o fma_cuda.o fma_cuda.cu
+nvcc warning : The 'compute_20', 'sm_20', and 'sm_21' architectures are deprecated, and may be removed in a future release (Use -Wno-deprecated-gpu-targets to suppress warning).
+nvcc -ccbin=icpc -Xcompiler '-fPIC' -O -dc -o fma_loop_dev.o fma_loop_dev.cu
+nvcc warning : The 'compute_20', 'sm_20', and 'sm_21' architectures are deprecated, and may be removed in a future release (Use -Wno-deprecated-gpu-targets to suppress warning).
+nvcc -ccbin=icpc -Xcompiler '-fPIC' -dlink  fma_cuda.o fma_loop_dev.o -o fma_cuda_link.o
+nvcc warning : The 'compute_20', 'sm_20', and 'sm_21' architectures are deprecated, and may be removed in a future release (Use -Wno-deprecated-gpu-targets to suppress warning).
+icpc -qopenmp -shared -Wl,-soname,libfma_cuda.so -o libfma_cuda.so fma_cuda_link.o fma_cuda.o fma_loop_dev.o -L/usr/local/pacerepov1/cuda/8.0.44/lib64 -Wl,-rpath,/usr/local/pacerepov1/cuda/8.0.44/lib64 -lcudart
+icpc -qopenmp -o fma_prof fma_prof.o fma_omp.o fma_loop_host.o libfma_cuda.so -Wl,-rpath,.
+OMP_PROC_BIND=spread OMP_NUM_THREADS=4  ./fma_prof 256 256 -1 -1 256 0.5 3.0
+[./fma_prof] Nh = 256, Nd = 256, T = 256, default block size
+[./fma_prof]: 5.071163e-04 elapsed seconds
+[./fma_prof]: 262144 flops executed
+[./fma_prof]: 5.169307e+08 flop/s
+21,25c21,25
+<   for (int i = 0; i < N; i++) {
+<     for (int j = 0; j < T; j++) {
+<       a[i] = a[i] * b + c;
+<     }
+<   }
+---
+> 	for (int j = 0; j < T; j++) {
+> 		for (int i = 0; i < N; i++) {
+> 			a[i] = a[i] * b + c;
+> 		}
+> 	}
+icc -g -Wall -std=c99 -fPIC -O -xHost -I/usr/local/pacerepov1/cuda/8.0.44/include -qopenmp -c -o fma_loop_host_opt.o fma_loop_host_opt.c
+nvcc -ccbin=icpc -Xcompiler '-fPIC' -O -dc -o fma_loop_dev_opt.o fma_loop_dev_opt.cu
+nvcc warning : The 'compute_20', 'sm_20', and 'sm_21' architectures are deprecated, and may be removed in a future release (Use -Wno-deprecated-gpu-targets to suppress warning).
+nvcc -ccbin=icpc -Xcompiler '-fPIC' -dlink  fma_cuda.o fma_loop_dev_opt.o -o fma_cuda_link_opt.o
+nvcc warning : The 'compute_20', 'sm_20', and 'sm_21' architectures are deprecated, and may be removed in a future release (Use -Wno-deprecated-gpu-targets to suppress warning).
+icpc -qopenmp -shared -Wl,-soname,libfma_cuda_opt.so -o libfma_cuda_opt.so fma_cuda_link_opt.o fma_cuda.o fma_loop_dev_opt.o -L/usr/local/pacerepov1/cuda/8.0.44/lib64 -Wl,-rpath,/usr/local/pacerepov1/cuda/8.0.44/lib64 -lcudart
+icpc -qopenmp -o fma_prof_opt fma_prof.o fma_omp.o fma_loop_host_opt.o libfma_cuda_opt.so -Wl,-rpath,.
+OMP_PROC_BIND=spread OMP_NUM_THREADS=4  ./fma_prof_opt 256 256 -1 -1 256 0.5 3.0
+[./fma_prof_opt] Nh = 256, Nd = 256, T = 256, default block size
+[./fma_prof_opt]: 4.849434e-04 elapsed seconds
+[./fma_prof_opt]: 262144 flops executed
+[./fma_prof_opt]: 5.405662e+08 flop/s
 
+qsub: job 15100.ice-sched.pace.gatech.edu completed
