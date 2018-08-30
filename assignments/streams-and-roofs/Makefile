@@ -1,22 +1,34 @@
 
 CC = icc
-CFLAGS = -g -Wall -O3 -std=c99
-CPPFLAGS =
+COPTFLAGS = -O3 -xHost -qopt-report=5
+OMPFLAGS = -qopenmp
+CFLAGS = -g -Wall -std=c99 -fPIC
+CPPFLAGS = -I$(CUDAROOT)/include
+CULIBS = -L$(CUDAROOT)/lib64 -Wl,-rpath,$(CUDAROOT)/lib64 -lcudart
+LIBS = $(CULIBS)
+NVCC = nvcc -ccbin=icpc
+NVCCFLAGS = -lineinfo -Xcompiler '-fPIC'
+CUOPTFLAGS = -O3
 RM = rm -f
-LIBS = -lm
+LINKER = icpc $(OMPFLAGS)
 
 all: cloud
 
 %.o: %.c
-	$(CC) $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
+	$(CC) $(CFLAGS) $(COPTFLAGS) $(CPPFLAGS) $(OMPFLAGS) -c -o $@ $<
 
+%.link.o: %.o
+	$(NVCC) -dlink -o $@ $< -lcudadevrt
+
+%.o: %.cu
+	$(NVCC) $(NVCCFLAGS) $(CUOPTFLAGS) -dc -o $@ $<
 
 verlet.o: verlet.c verlet.h cloud.h
 
 cloud.o: cloud.c verlet.h cloud.h
 
 cloud: verlet.o cloud.o
-	$(CC) -o $@ $^ $(LIBS)
+	$(LINKER) -o $@ $^ -Wl,-rpath,.
 
 clean:
 	$(RM) *.o cloud
