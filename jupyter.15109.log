@@ -17,3 +17,8 @@ Do not close the terminal where that is running, and open the address below in y
 [I 03:52:45.299 NotebookApp] Kernel started: 23088c79-9691-45f8-88a8-41f06ee4b79c
 [W 03:52:45.331 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20180830035132 (127.0.0.1) 8.48ms referer=http://localhost:9714/notebooks/cse6230/assignments/first-week-flops/first-week-flops.ipynb
 [I 03:52:47.749 NotebookApp] Adapting to protocol v5.1 for kernel 23088c79-9691-45f8-88a8-41f06ee4b79c
+[I 03:54:45.297 NotebookApp] Saving file at /cse6230/assignments/first-week-flops/first-week-flops.ipynb
+[I 03:57:37.083 NotebookApp] Starting buffering for 23088c79-9691-45f8-88a8-41f06ee4b79c:66cf4516ad3e456180147c95735dbc0f
+[C 04:22:29.522 NotebookApp] received signal 15, stopping
+[I 04:22:29.527 NotebookApp] Shutting down 1 kernel
+[IPKernelApp] WARNING | Parent appears to have exited, shutting down.

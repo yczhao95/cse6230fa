@@ -1,0 +1,166 @@
+Intel(R) Advisor can now assist with vectorization and show optimization
+  report messages with your source code.
+See "https://software.intel.com/en-us/intel-advisor-xe" for details.
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINING OPTION VALUES:
+  -inline-factor: 100
+  -inline-min-size: 30
+  -inline-max-size: 230
+  -inline-max-total-size: 2000
+  -inline-max-per-routine: 10000
+  -inline-max-per-compile: 500000
+
+
+Begin optimization report for: main(int, char **)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (main(int, char **)) [1] cloud.c(74,1)
+  -> EXTERN: (86,5) printf(const char *__restrict__, ...)
+  -> INLINE (MANUAL): (89,8) atoi(const char *)
+    -> EXTERN: /usr/include/stdlib.h:(286,16) strtol(const char *__restrict__, char **__restrict__, int)
+  -> INLINE (MANUAL): (90,8) atoi(const char *)
+    -> EXTERN: /usr/include/stdlib.h:(286,16) strtol(const char *__restrict__, char **__restrict__, int)
+  -> INLINE (MANUAL): (91,17) atof(const char *)
+    -> EXTERN: /usr/include/stdlib.h:(281,10) strtod(const char *__restrict__, char **__restrict__)
+  -> INLINE (MANUAL): (93,12) atoi(const char *)
+    -> EXTERN: /usr/include/stdlib.h:(286,16) strtol(const char *__restrict__, char **__restrict__, int)
+  -> EXTERN: (102,3) printf(const char *__restrict__, ...)
+  -> (104,9) safe_malloc(size_t, void *, const char *, const char *, int)
+  -> (105,9) safe_malloc(size_t, void *, const char *, const char *, int)
+  -> (106,9) safe_malloc(size_t, void *, const char *, const char *, int)
+  -> (107,9) safe_malloc(size_t, void *, const char *, const char *, int)
+  -> (108,9) safe_malloc(size_t, void *, const char *, const char *, int)
+  -> (109,9) safe_malloc(size_t, void *, const char *, const char *, int)
+  -> (110,9) safe_malloc(size_t, void *, const char *, const char *, int)
+  -> (111,9) safe_malloc(size_t, void *, const char *, const char *, int)
+  -> EXTERN: (132,25) rand(void)
+  -> EXTERN: (133,25) rand(void)
+  -> EXTERN: (134,33) rand(void)
+  -> EXTERN: (136,23) cos(double)
+  -> EXTERN: (137,17) cos(double)
+  -> EXTERN: (138,17) sin(double)
+  -> EXTERN: (139,31) sin(double)
+  -> EXTERN: (140,36) cos(double)
+  -> EXTERN: (144,33) rand(void)
+  -> EXTERN: (145,33) rand(void)
+  -> EXTERN: (146,33) rand(void)
+  -> EXTERN: (148,14) sin(double)
+  -> EXTERN: (149,14) cos(double)
+  -> EXTERN: (150,14) sin(double)
+  -> EXTERN: (151,14) cos(double)
+  -> EXTERN: (152,14) sin(double)
+  -> EXTERN: (153,14) cos(double)
+  -> INLINE: (172,3) compute_hamiltonian(int, real_t *, const real_t *, const real_t *, const real_t *, const real_t *, const real_t *, const real_t *)
+  -> EXTERN: (173,3) memcpy(void *__restrict__, const void *__restrict__, size_t)
+  -> EXTERN: (176,16) omp_get_wtime(void)
+  -> EXTERN: (185,17) omp_get_thread_num(void)
+  -> EXTERN: (186,19) omp_get_num_threads(void)
+  -> INLINE: (204,22) write_step(int, int, const char *, const real_t *, const real_t *, const real_t *, const real_t *)
+    -> EXTERN: (48,3) snprintf(char *__restrict__, size_t, const char *__restrict__, ...)
+    -> EXTERN: (49,8) fopen(const char *__restrict__, const char *__restrict__)
+    -> EXTERN: (51,5) fprintf(FILE *__restrict__, const char *__restrict__, ...)
+    -> EXTERN: (54,3) fprintf(FILE *__restrict__, const char *__restrict__, ...)
+    -> EXTERN: (55,3) fprintf(FILE *__restrict__, const char *__restrict__, ...)
+    -> EXTERN: (56,3) fprintf(FILE *__restrict__, const char *__restrict__, ...)
+    -> EXTERN: (57,3) fprintf(FILE *__restrict__, const char *__restrict__, ...)
+    -> EXTERN: (58,3) fprintf(FILE *__restrict__, const char *__restrict__, ...)
+    -> EXTERN: (60,5) fprintf(FILE *__restrict__, const char *__restrict__, ...)
+    -> EXTERN: (62,3) fprintf(FILE *__restrict__, const char *__restrict__, ...)
+    -> EXTERN: (63,3) fprintf(FILE *__restrict__, const char *__restrict__, ...)
+    -> EXTERN: (64,3) fprintf(FILE *__restrict__, const char *__restrict__, ...)
+    -> EXTERN: (66,5) fprintf(FILE *__restrict__, const char *__restrict__, ...)
+    -> EXTERN: (68,3) fclose(FILE *)
+  -> EXTERN: (208,7) verlet_step(int, int, real_t, real_t *__restrict__, real_t *__restrict__, real_t *__restrict__, real_t *__restrict__, real_t *__restrict__, real_t *__restrict__)
+  -> EXTERN: (216,14) omp_get_wtime(void)
+  -> EXTERN: (218,3) printf(const char *__restrict__, ...)
+  -> EXTERN: (219,3) printf(const char *__restrict__, ...)
+  -> EXTERN: (220,3) printf(const char *__restrict__, ...)
+  -> EXTERN: (230,3) free(void *)
+  -> EXTERN: (231,3) free(void *)
+  -> EXTERN: (232,3) free(void *)
+  -> EXTERN: (233,3) free(void *)
+  -> EXTERN: (234,3) free(void *)
+  -> EXTERN: (235,3) free(void *)
+  -> EXTERN: (236,3) free(void *)
+  -> EXTERN: (237,3) free(void *)
+
+
+    Report from: OpenMP optimizations [openmp]
+
+cloud.c(203:1-203:1):OMP:main:  OpenMP multithreaded code generation for MASTER was successful
+cloud.c(113:3-113:3):OMP:main:  OpenMP DEFINED LOOP WAS PARALLELIZED
+cloud.c(178:1-178:1):OMP:main:  OpenMP DEFINED REGION WAS PARALLELIZED
+
+    Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
+
+
+LOOP BEGIN at cloud.c(36,3) inlined into cloud.c(172,3)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+   remark #15346: vector dependence: assumed FLOW dependence between Hin line 37 and u line 37
+LOOP END
+
+LOOP BEGIN at cloud.c(114,3)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+   remark #15346: vector dependence: assumed OUTPUT dependence between x line 115 and w line 120
+   remark #25439: unrolled with remainder by 2  
+LOOP END
+
+LOOP BEGIN at cloud.c(114,3)
+<Remainder>
+LOOP END
+
+LOOP BEGIN at cloud.c(59,3) inlined into cloud.c(204,22)
+   remark #15527: loop was not vectorized: function call to fprintf(FILE *__restrict__, const char *__restrict__, ...) cannot be vectorized   [ cloud.c(60,5) ]
+LOOP END
+
+LOOP BEGIN at cloud.c(65,3) inlined into cloud.c(204,22)
+   remark #15527: loop was not vectorized: function call to fprintf(FILE *__restrict__, const char *__restrict__, ...) cannot be vectorized   [ cloud.c(66,5) ]
+LOOP END
+
+
+Non-optimizable loops:
+
+
+LOOP BEGIN at cloud.c(124,3)
+   remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
+LOOP END
+
+LOOP BEGIN at cloud.c(202,5)
+   remark #15543: loop was not vectorized: loop with function call not considered an optimization candidate.   [ cloud.c(203,1) ]
+LOOP END
+
+    Report from: Code generation optimizations [cg]
+
+cloud.c(173,3):remark #34014: optimization advice for memcpy: increase the destination's alignment to 16 (and use __assume_aligned) to speed up library implementation
+cloud.c(173,3):remark #34014: optimization advice for memcpy: increase the source's alignment to 16 (and use __assume_aligned) to speed up library implementation
+cloud.c(173,3):remark #34026: call to memcpy implemented as a call to optimized library version
+===========================================================================
+
+Begin optimization report for: safe_malloc(size_t, void *, const char *, const char *, int)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (safe_malloc(size_t, void *, const char *, const char *, int)) [2] cloud.c(15,1)
+  -> EXTERN: (20,22) malloc(size_t)
+  -> EXTERN: (22,5) fprintf(FILE *__restrict__, const char *__restrict__, ...)
+
+===========================================================================
+
+Begin optimization report for: compute_hamiltonian(int, real_t *, const real_t *, const real_t *, const real_t *, const real_t *, const real_t *, const real_t *)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (compute_hamiltonian(int, real_t *, const real_t *, const real_t *, const real_t *, const real_t *, const real_t *, const real_t *)) cloud.c(35,1)
+
+===========================================================================
+
+Begin optimization report for: write_step(int, int, const char *, const real_t *, const real_t *, const real_t *, const real_t *)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (write_step(int, int, const char *, const real_t *, const real_t *, const real_t *, const real_t *)) cloud.c(44,1)
+
+===========================================================================

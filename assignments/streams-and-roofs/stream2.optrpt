@@ -1,0 +1,383 @@
+Intel(R) Advisor can now assist with vectorization and show optimization
+  report messages with your source code.
+See "https://software.intel.com/en-us/intel-advisor-xe" for details.
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINING OPTION VALUES:
+  -inline-factor: 100
+  -inline-min-size: 30
+  -inline-max-size: 230
+  -inline-max-total-size: 2000
+  -inline-max-per-routine: 10000
+  -inline-max-per-compile: 500000
+
+
+Begin optimization report for: main()
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (main()) [1] stream2.c(209,5)
+  -> EXTERN: (219,5) printf(const char *__restrict__, ...)
+  -> EXTERN: (220,5) printf(const char *__restrict__, ...)
+  -> EXTERN: (221,5) printf(const char *__restrict__, ...)
+  -> EXTERN: (223,5) printf(const char *__restrict__, ...)
+  -> EXTERN: (226,5) printf(const char *__restrict__, ...)
+  -> EXTERN: (235,5) printf(const char *__restrict__, ...)
+  -> EXTERN: (236,5) printf(const char *__restrict__, ...)
+  -> EXTERN: (239,5) printf(const char *__restrict__, ...)
+  -> EXTERN: (242,5) printf(const char *__restrict__, ...)
+  -> EXTERN: (243,5) printf(const char *__restrict__, ...)
+  -> EXTERN: (244,5) printf(const char *__restrict__, ...)
+  -> EXTERN: (247,5) printf(const char *__restrict__, ...)
+  -> EXTERN: (252,10) omp_get_num_threads()
+  -> EXTERN: (253,6) printf(const char *__restrict__, ...)
+  -> EXTERN: (263,5) printf(const char *__restrict__, ...)
+  -> EXTERN: (273,5) printf(const char *__restrict__, ...)
+  -> (275,22) checktick()
+  -> EXTERN: (276,2) printf(const char *__restrict__, ...)
+  -> EXTERN: (279,2) printf(const char *__restrict__, ...)
+  -> (284,9) mysecond()
+  -> (288,18) mysecond()
+  -> EXTERN: (290,5) printf(const char *__restrict__, ...)
+  -> EXTERN: (292,5) printf(const char *__restrict__, ...)
+  -> EXTERN: (293,5) printf(const char *__restrict__, ...)
+  -> EXTERN: (294,5) printf(const char *__restrict__, ...)
+  -> EXTERN: (296,5) printf(const char *__restrict__, ...)
+  -> EXTERN: (298,5) printf(const char *__restrict__, ...)
+  -> EXTERN: (299,5) printf(const char *__restrict__, ...)
+  -> EXTERN: (300,5) printf(const char *__restrict__, ...)
+  -> EXTERN: (301,5) printf(const char *__restrict__, ...)
+  -> (308,16) mysecond()
+  -> (316,16) mysecond()
+  -> (318,16) mysecond()
+  -> (326,16) mysecond()
+  -> (328,16) mysecond()
+  -> (336,16) mysecond()
+  -> (338,16) mysecond()
+  -> (346,16) mysecond()
+  -> EXTERN: (361,5) printf(const char *__restrict__, ...)
+  -> EXTERN: (365,3) printf(const char *__restrict__, ...)
+  -> EXTERN: (371,5) printf(const char *__restrict__, ...)
+  -> (374,5) checkSTREAMresults()
+  -> EXTERN: (375,5) printf(const char *__restrict__, ...)
+
+
+    Report from: OpenMP optimizations [openmp]
+
+stream2.c(250:1-250:1):OMP:main:  OpenMP multithreaded code generation for MASTER was successful
+stream2.c(262:3-262:3):OMP:main:  OpenMP multithreaded code generation for ATOMIC was successful
+stream2.c(248:1-248:1):OMP:main:  OpenMP DEFINED REGION WAS PARALLELIZED
+stream2.c(260:1-260:1):OMP:main:  OpenMP DEFINED REGION WAS PARALLELIZED
+stream2.c(285:1-285:1):OMP:main:  OpenMP DEFINED LOOP WAS PARALLELIZED
+stream2.c(312:1-312:1):OMP:main:  OpenMP DEFINED LOOP WAS PARALLELIZED
+stream2.c(322:1-322:1):OMP:main:  OpenMP DEFINED LOOP WAS PARALLELIZED
+stream2.c(332:1-332:1):OMP:main:  OpenMP DEFINED LOOP WAS PARALLELIZED
+stream2.c(342:1-342:1):OMP:main:  OpenMP DEFINED LOOP WAS PARALLELIZED
+
+    Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
+
+
+LOOP BEGIN at stream2.c(267,5)
+   remark #15300: LOOP WAS VECTORIZED
+   remark #15449: unmasked aligned unit stride stores: 3 
+   remark #15467: unmasked aligned streaming stores: 3 
+   remark #15475: --- begin vector loop cost summary ---
+   remark #15476: scalar loop cost: 11 
+   remark #15477: vector loop cost: 4.500 
+   remark #15478: estimated potential speedup: 2.440 
+   remark #15488: --- end vector loop cost summary ---
+   remark #25015: Estimate of max trip count of loop=40000000
+LOOP END
+
+LOOP BEGIN at stream2.c(351,5)
+<Distributed chunk1>
+   remark #25426: Loop Distributed (2 way) 
+   remark #25444: Loopnest Interchanged: ( 1 2 ) --> ( 2 1 )
+   remark #15541: outer loop was not auto-vectorized: consider using SIMD directive   [ stream2.c(353,2) ]
+   remark #25436: completely unrolled by 4  
+
+   LOOP BEGIN at stream2.c(351,5)
+      remark #15335: loop was not vectorized: vectorization possible but seems inefficient. Use vector always directive or -vec-threshold0 to override 
+      remark #15450: unmasked unaligned unit stride loads: 1 
+      remark #15475: --- begin vector loop cost summary ---
+      remark #15476: scalar loop cost: 25 
+      remark #15477: vector loop cost: 8.000 
+      remark #15478: estimated potential speedup: 1.770 
+      remark #15488: --- end vector loop cost summary ---
+      remark #25436: completely unrolled by 9  
+   LOOP END
+
+   LOOP BEGIN at stream2.c(351,5)
+   LOOP END
+
+   LOOP BEGIN at stream2.c(351,5)
+   LOOP END
+
+   LOOP BEGIN at stream2.c(351,5)
+   LOOP END
+LOOP END
+
+LOOP BEGIN at stream2.c(362,5)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+   remark #25436: completely unrolled by 4  
+LOOP END
+
+LOOP BEGIN at stream2.c(286,5)
+<Peeled loop for vectorization>
+   remark #25015: Estimate of max trip count of loop=80000000
+LOOP END
+
+LOOP BEGIN at stream2.c(286,5)
+   remark #15300: LOOP WAS VECTORIZED
+   remark #15448: unmasked aligned unit stride loads: 1 
+   remark #15449: unmasked aligned unit stride stores: 1 
+   remark #15475: --- begin vector loop cost summary ---
+   remark #15476: scalar loop cost: 6 
+   remark #15477: vector loop cost: 3.000 
+   remark #15478: estimated potential speedup: 1.990 
+   remark #15488: --- end vector loop cost summary ---
+   remark #25015: Estimate of max trip count of loop=40000000
+LOOP END
+
+LOOP BEGIN at stream2.c(286,5)
+<Remainder loop for vectorization>
+   remark #25015: Estimate of max trip count of loop=80000000
+LOOP END
+
+LOOP BEGIN at stream2.c(313,2)
+   remark #25401: memcopy(with guard) generated
+   remark #15542: loop was not vectorized: inner loop was already vectorized
+   remark #25015: Estimate of max trip count of loop=80000000
+
+   LOOP BEGIN at stream2.c(313,2)
+   <Peeled loop for vectorization, Multiversioned v2>
+      remark #25015: Estimate of max trip count of loop=80000000
+   LOOP END
+
+   LOOP BEGIN at stream2.c(313,2)
+   <Multiversioned v2>
+      remark #15300: LOOP WAS VECTORIZED
+      remark #15448: unmasked aligned unit stride loads: 1 
+      remark #15449: unmasked aligned unit stride stores: 1 
+      remark #15467: unmasked aligned streaming stores: 1 
+      remark #15475: --- begin vector loop cost summary ---
+      remark #15476: scalar loop cost: 4 
+      remark #15477: vector loop cost: 1.500 
+      remark #15478: estimated potential speedup: 2.660 
+      remark #15488: --- end vector loop cost summary ---
+      remark #25015: Estimate of max trip count of loop=40000000
+   LOOP END
+
+   LOOP BEGIN at stream2.c(313,2)
+   <Remainder loop for vectorization, Multiversioned v2>
+      remark #25015: Estimate of max trip count of loop=80000000
+   LOOP END
+LOOP END
+
+LOOP BEGIN at stream2.c(323,2)
+<Peeled loop for vectorization>
+   remark #25015: Estimate of max trip count of loop=80000000
+LOOP END
+
+LOOP BEGIN at stream2.c(323,2)
+   remark #15300: LOOP WAS VECTORIZED
+   remark #15448: unmasked aligned unit stride loads: 1 
+   remark #15449: unmasked aligned unit stride stores: 1 
+   remark #15467: unmasked aligned streaming stores: 1 
+   remark #15475: --- begin vector loop cost summary ---
+   remark #15476: scalar loop cost: 6 
+   remark #15477: vector loop cost: 3.000 
+   remark #15478: estimated potential speedup: 1.990 
+   remark #15488: --- end vector loop cost summary ---
+   remark #25015: Estimate of max trip count of loop=40000000
+LOOP END
+
+LOOP BEGIN at stream2.c(323,2)
+<Remainder loop for vectorization>
+   remark #25015: Estimate of max trip count of loop=80000000
+LOOP END
+
+LOOP BEGIN at stream2.c(333,2)
+<Peeled loop for vectorization>
+   remark #25015: Estimate of max trip count of loop=80000000
+LOOP END
+
+LOOP BEGIN at stream2.c(333,2)
+   remark #15300: LOOP WAS VECTORIZED
+   remark #15448: unmasked aligned unit stride loads: 2 
+   remark #15449: unmasked aligned unit stride stores: 1 
+   remark #15467: unmasked aligned streaming stores: 1 
+   remark #15475: --- begin vector loop cost summary ---
+   remark #15476: scalar loop cost: 6 
+   remark #15477: vector loop cost: 2.500 
+   remark #15478: estimated potential speedup: 2.390 
+   remark #15488: --- end vector loop cost summary ---
+   remark #25015: Estimate of max trip count of loop=40000000
+LOOP END
+
+LOOP BEGIN at stream2.c(333,2)
+<Remainder loop for vectorization>
+   remark #25015: Estimate of max trip count of loop=80000000
+LOOP END
+
+LOOP BEGIN at stream2.c(343,2)
+<Peeled loop for vectorization>
+   remark #25015: Estimate of max trip count of loop=80000000
+LOOP END
+
+LOOP BEGIN at stream2.c(343,2)
+   remark #15300: LOOP WAS VECTORIZED
+   remark #15448: unmasked aligned unit stride loads: 2 
+   remark #15449: unmasked aligned unit stride stores: 1 
+   remark #15467: unmasked aligned streaming stores: 1 
+   remark #15475: --- begin vector loop cost summary ---
+   remark #15476: scalar loop cost: 9 
+   remark #15477: vector loop cost: 4.000 
+   remark #15478: estimated potential speedup: 2.240 
+   remark #15488: --- end vector loop cost summary ---
+   remark #25015: Estimate of max trip count of loop=40000000
+LOOP END
+
+LOOP BEGIN at stream2.c(343,2)
+<Remainder loop for vectorization>
+   remark #25015: Estimate of max trip count of loop=80000000
+LOOP END
+
+
+Non-optimizable loops:
+
+
+LOOP BEGIN at stream2.c(306,5)
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form
+LOOP END
+
+    Report from: Code generation optimizations [cg]
+
+stream2.c(314,6):remark #34014: optimization advice for memcpy: increase the destination's alignment to 16 (and use __assume_aligned) to speed up library implementation
+stream2.c(314,6):remark #34014: optimization advice for memcpy: increase the source's alignment to 16 (and use __assume_aligned) to speed up library implementation
+stream2.c(314,6):remark #34026: call to memcpy implemented as a call to optimized library version
+===========================================================================
+
+Begin optimization report for: mysecond()
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (mysecond()) [2] stream2.c(420,1)
+  -> EXTERN: (425,13) gettimeofday(struct timeval *__restrict__, __timezone_ptr_t)
+
+===========================================================================
+
+Begin optimization report for: checktick()
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (checktick()) [3] stream2.c(384,5)
+  -> (391,7) mysecond()
+  -> (392,14) mysecond()
+  -> (392,14) mysecond()
+
+
+    Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
+
+
+LOOP BEGIN at stream2.c(404,5)
+   remark #15300: LOOP WAS VECTORIZED
+   remark #15448: unmasked aligned unit stride loads: 1 
+   remark #15450: unmasked unaligned unit stride loads: 1 
+   remark #15475: --- begin vector loop cost summary ---
+   remark #15476: scalar loop cost: 17 
+   remark #15477: vector loop cost: 7.000 
+   remark #15478: estimated potential speedup: 1.990 
+   remark #15487: type converts: 1 
+   remark #15488: --- end vector loop cost summary ---
+   remark #25015: Estimate of max trip count of loop=1
+LOOP END
+
+LOOP BEGIN at stream2.c(404,5)
+<Remainder loop for vectorization>
+   remark #25436: completely unrolled by 1  
+LOOP END
+
+
+Non-optimizable loops:
+
+
+LOOP BEGIN at stream2.c(390,5)
+   remark #15543: loop was not vectorized: loop with function call not considered an optimization candidate.   [ stream2.c(391,7) ]
+
+   LOOP BEGIN at stream2.c(392,2)
+      remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form
+   LOOP END
+LOOP END
+===========================================================================
+
+Begin optimization report for: checkSTREAMresults()
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (checkSTREAMresults()) [4] stream2.c(433,1)
+  -> EXTERN: (485,3) printf(const char *__restrict__, ...)
+  -> EXTERN: (486,3) printf(const char *__restrict__, ...)
+  -> EXTERN: (499,3) printf(const char *__restrict__, ...)
+  -> EXTERN: (503,3) printf(const char *__restrict__, ...)
+  -> EXTERN: (504,3) printf(const char *__restrict__, ...)
+  -> EXTERN: (505,3) printf(const char *__restrict__, ...)
+  -> EXTERN: (518,3) printf(const char *__restrict__, ...)
+  -> EXTERN: (522,3) printf(const char *__restrict__, ...)
+  -> EXTERN: (523,3) printf(const char *__restrict__, ...)
+  -> EXTERN: (524,3) printf(const char *__restrict__, ...)
+  -> EXTERN: (537,3) printf(const char *__restrict__, ...)
+  -> EXTERN: (540,3) printf(const char *__restrict__, ...)
+
+
+    Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
+
+
+LOOP BEGIN at stream2.c(449,2)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+   remark #15346: vector dependence: assumed FLOW dependence between aj line 454 and aj line 452
+   remark #25436: completely unrolled by 10  
+LOOP END
+
+LOOP BEGIN at stream2.c(461,2)
+   remark #15300: LOOP WAS VECTORIZED
+   remark #15448: unmasked aligned unit stride loads: 3 
+   remark #15475: --- begin vector loop cost summary ---
+   remark #15476: scalar loop cost: 37 
+   remark #15477: vector loop cost: 12.000 
+   remark #15478: estimated potential speedup: 3.080 
+   remark #15488: --- end vector loop cost summary ---
+   remark #25015: Estimate of max trip count of loop=40000000
+LOOP END
+
+LOOP BEGIN at stream2.c(488,3)
+   remark #15300: LOOP WAS VECTORIZED
+   remark #15448: unmasked aligned unit stride loads: 1 
+   remark #15475: --- begin vector loop cost summary ---
+   remark #15476: scalar loop cost: 54 
+   remark #15477: vector loop cost: 24.000 
+   remark #15488: --- end vector loop cost summary ---
+   remark #25015: Estimate of max trip count of loop=10000000
+LOOP END
+
+LOOP BEGIN at stream2.c(507,3)
+   remark #15300: LOOP WAS VECTORIZED
+   remark #15448: unmasked aligned unit stride loads: 1 
+   remark #15475: --- begin vector loop cost summary ---
+   remark #15476: scalar loop cost: 54 
+   remark #15477: vector loop cost: 24.000 
+   remark #15488: --- end vector loop cost summary ---
+   remark #25015: Estimate of max trip count of loop=10000000
+LOOP END
+
+LOOP BEGIN at stream2.c(526,3)
+   remark #15300: LOOP WAS VECTORIZED
+   remark #15448: unmasked aligned unit stride loads: 1 
+   remark #15475: --- begin vector loop cost summary ---
+   remark #15476: scalar loop cost: 54 
+   remark #15477: vector loop cost: 24.000 
+   remark #15488: --- end vector loop cost summary ---
+   remark #25015: Estimate of max trip count of loop=10000000
+LOOP END
+===========================================================================
