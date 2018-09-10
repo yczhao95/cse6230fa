@@ -91,42 +91,31 @@ compute_hamiltonian (int Np, double k,
 }
 
 static int
-write_step (int Np, double T, const double *X[3])
+write_step (int Np, double T, double H, const double *X[3])
 {
-  int line_size = 4;
-
-  printf ("{ \"num_points\": %d,\n", Np);
-  printf ("  \"time\": %g,\n", T);
-  printf("  \"X\": [\n");
+  printf ("{\"num_points\":%d,", Np);
+  printf ("\"time\":%g,", T);
+  printf ("\"hamiltonian\":%g,", H);
+  printf("\"X\":[");
   for (int d=0; d < 3; d++) {
-    printf("    [\n");
-    for (int l = 0; l < Np; l+= line_size) {
-      printf("     ");
-      if (l + line_size < Np) {
-        for (int j = 0; j < line_size; j++) {
-          printf(" %+9.2e,", X[d][l + j]);
-        }
-      }
-      else {
-        for (int j = 0; j < Np - 1 - l; j++) {
-          printf(" %+9.2e,", X[d][l + j]);
-        }
-        printf(" %+9.2e", X[d][Np - 1]);
-      }
-      printf("\n");
+    printf ("[");
+    for (int l = 0; l < Np - 1; l++) {
+      printf ("%9.2e,", X[d][l]);
     }
-    printf("    ],\n");
+    if (Np) {printf ("%9.2e]", X[d][Np - 1]);}
+    if (d < 2) {
+      printf (",");
+    }
   }
-  printf("  ]\n");
-  printf ("}\n");
+  printf("]}\n");
   return 0;
 }
 
 int
-process_options (int argc, char **argv, int *Np, int *Nt, int *Nint, double *dt, double *k, double *d, int *pipe)
+process_options (int argc, char **argv, int *Np, int *Nt, int *Nint, double *dt, double *k, double *d, const char **gifname)
 {
   if (argc < 6 || argc > 8) {
-    printf ("Usage: %s NUM_POINTS NUM_STEPS DT K D [CHUNK_SIZE PIPE_JSON]\n", argv[0]);
+    printf ("Usage: %s NUM_POINTS NUM_STEPS DT K D [CHUNK_SIZE GIFNAME]\n", argv[0]);
     return 1;
   }
   *Np = atoi (argv[1]);
@@ -137,10 +126,10 @@ process_options (int argc, char **argv, int *Np, int *Nt, int *Nint, double *dt,
   if (argc > 6) {
     *Nint = atoi (argv[6]);
     if (argc == 8) {
-      *pipe = atoi (argv[7]);
+      *gifname = argv[7];
     }
     else {
-      *pipe = 0;
+      *gifname = NULL;
     }
   }
   else {
@@ -162,12 +151,12 @@ main (int argc, char **argv)
   double *X[3], *U[3];
   double Hin, Hout;
   int seed = 6230;
-  int pipe = 0;
+  const char *gifname = NULL;
   cse6230rand_t rand;
   TicTocTimer loop_timer;
   double loop_time;
 
-  err = process_options (argc, argv, &Np, &Nt, &Nint, &dt, &k, &d, &pipe);CHK(err);
+  err = process_options (argc, argv, &Np, &Nt, &Nint, &dt, &k, &d, &gifname);CHK(err);
 
   for (int d = 0; d < 3; d++) {
     err = safeMALLOC (Np * sizeof (double), &X0[d]);CHK(err);
@@ -180,25 +169,28 @@ main (int argc, char **argv)
   initialize_variables (Np, k, &rand, X0, X, U);
 
   Hin = compute_hamiltonian (Np, k, (const double **)X, (const double **)U);
-  if (!pipe) {
+  if (!gifname) {
     printf ("[%s] NUM_POINTS=%d, NUM_STEPS=%d, CHUNK_SIZE=%d, DT=%g, K=%g, D=%g\n", argv[0], Np, Nt, Nint, dt, k, d);
     printf ("[%s] Hamiltonian, T = 0: %g\n", argv[0], Hin);
   }
   else {
-    printf ("{ \"num_points\": %d, \"k\": %e, \"d\": %e, \"dt\": %e, \"num_steps\": %d, \"step_chunk\": %d, \"hamiltonian_0\": %e }\n",
-            Np, k, d, dt, Nt, Nint, Hin);
+    printf ("{ \"num_points\": %d, \"k\": %e, \"d\": %e, \"dt\": %e, \"num_steps\": %d, \"step_chunk\": %d, \"hamiltonian_0\": %e, \"gifname\":\"%s\" }\n",
+            Np, k, d, dt, Nt, Nint, Hin, gifname);
   }
 
 
   loop_timer = tic();
   for (int t = 0; t < Nt; t += Nint) {
-    if (pipe) {write_step (Np, t * dt, (const double **)X);}
+    if (gifname) {
+      Hout = compute_hamiltonian (Np, k, (const double **)X, (const double **)U);
+      write_step (Np, t * dt, Hout, (const double **)X);
+    }
     /* execute the loop */
     verlet_step (Np, Nint, dt, k, d, &rand, X, U);
   }
   loop_time = toc(&loop_timer);
-  if (pipe) {write_step (Np, Nt * dt, (const double **)X);}
   Hout = compute_hamiltonian (Np, k, (const double **)X, (const double **)U);
+  if (gifname) {write_step (Np, Nt * dt, Hout, (const double **)X);}
   {
     double avgDist = 0.;
 
@@ -214,7 +206,7 @@ main (int argc, char **argv)
     }
     avgDist /= Np;
 
-    if (!pipe) {
+    if (!gifname) {
       printf ("[%s] Simulation time: %g\n", argv[0], loop_time);
       printf ("[%s] Hamiltonian, T = %g: %g, Relative Error: %g\n", argv[0], Nt * dt, Hout, fabs(Hout - Hin) / Hin);
       printf ("[%s] Average Distance Traveled: %g\n", argv[0], avgDist);
