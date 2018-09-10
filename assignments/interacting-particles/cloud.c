@@ -91,40 +91,42 @@ compute_hamiltonian (int Np, double k,
 }
 
 static int
-write_step (int Np, int k, const char *basename, const double *x, const double *y, const double *z, const double *H)
+write_step (int Np, double T, const double *X[3])
 {
-  char outname[BUFSIZ];
-  FILE *fp;
+  int line_size = 4;
 
-  snprintf (outname, BUFSIZ-1, "%s_%d.vtk", basename, k);
-  fp = fopen (outname, "w");
-  if (!fp) {
-    fprintf (stderr, "unable to open %s for output\n", outname);
-    return 1;
+  printf ("{ \"num_points\": %d,\n", Np);
+  printf ("  \"time\": %g,\n", T);
+  printf("  \"X\": [\n");
+  for (int d=0; d < 3; d++) {
+    printf("    [\n");
+    for (int l = 0; l < Np; l+= line_size) {
+      printf("     ");
+      if (l + line_size < Np) {
+        for (int j = 0; j < line_size; j++) {
+          printf(" %+9.2e,", X[d][l + j]);
+        }
+      }
+      else {
+        for (int j = 0; j < Np - 1 - l; j++) {
+          printf(" %+9.2e,", X[d][l + j]);
+        }
+        printf(" %+9.2e", X[d][Np - 1]);
+      }
+      printf("\n");
+    }
+    printf("    ],\n");
   }
-  fprintf (fp, "# vtk DataFile Version 2.0\n");
-  fprintf (fp, "Point cloud example\n");
-  fprintf (fp, "ASCII\n");
-  fprintf (fp, "DATASET POLYDATA\n");
-  fprintf (fp, "POINTS %d FLOAT\n", Np);
-  for (int i = 0; i < Np; i++) {
-    fprintf (fp, "%f %f %f\n", (float) x[i], (float) y[i], (float) z[i]);
-  }
-  fprintf (fp, "\nPOINT_DATA %d\n", Np);
-  fprintf (fp, "SCALARS Hamiltonian float\n");
-  fprintf (fp, "LOOKUP_TABLE default\n");
-  for (int i = 0; i < Np; i++) {
-    fprintf (fp, "%f\n", (float) H[i]);
-  }
-  fclose (fp);
+  printf("  ]\n");
+  printf ("}\n");
   return 0;
 }
 
 int
-process_options (int argc, char **argv, int *Np, int *Nt, int *Nint, double *dt, double *k, double *d, const char **basename)
+process_options (int argc, char **argv, int *Np, int *Nt, int *Nint, double *dt, double *k, double *d, int *pipe)
 {
   if (argc < 6 || argc > 8) {
-    printf ("Usage: %s NUM_POINTS NUM_STEPS DT K D [CHUNK_SIZE OUTPUT]\n", argv[0]);
+    printf ("Usage: %s NUM_POINTS NUM_STEPS DT K D [CHUNK_SIZE PIPE_JSON]\n", argv[0]);
     return 1;
   }
   *Np = atoi (argv[1]);
@@ -135,7 +137,10 @@ process_options (int argc, char **argv, int *Np, int *Nt, int *Nint, double *dt,
   if (argc > 6) {
     *Nint = atoi (argv[6]);
     if (argc == 8) {
-      *basename = argv[7];
+      *pipe = atoi (argv[7]);
+    }
+    else {
+      *pipe = 0;
     }
   }
   else {
@@ -157,13 +162,12 @@ main (int argc, char **argv)
   double *X[3], *U[3];
   double Hin, Hout;
   int seed = 6230;
-  const char *basename = NULL;
+  int pipe = 0;
   cse6230rand_t rand;
-  TicTocTimer time_loop;
+  TicTocTimer loop_timer;
+  double loop_time;
 
-  err = process_options (argc, argv, &Np, &Nt, &Nint, &dt, &k, &d, &basename);CHK(err);
-
-  printf ("[%s] NUM_POINTS=%d, NUM_STEPS=%d, CHUNK_SIZE=%d, DT=%g, K=%g, D=%g\n", argv[0], Np, Nt, Nint, dt, k, d);
+  err = process_options (argc, argv, &Np, &Nt, &Nint, &dt, &k, &d, &pipe);CHK(err);
 
   for (int d = 0; d < 3; d++) {
     err = safeMALLOC (Np * sizeof (double), &X0[d]);CHK(err);
@@ -176,20 +180,25 @@ main (int argc, char **argv)
   initialize_variables (Np, k, &rand, X0, X, U);
 
   Hin = compute_hamiltonian (Np, k, (const double **)X, (const double **)U);
-  printf ("[%s] Hamiltonian, T = 0: %g\n", argv[0], Hin);
+  if (!pipe) {
+    printf ("[%s] NUM_POINTS=%d, NUM_STEPS=%d, CHUNK_SIZE=%d, DT=%g, K=%g, D=%g\n", argv[0], Np, Nt, Nint, dt, k, d);
+    printf ("[%s] Hamiltonian, T = 0: %g\n", argv[0], Hin);
+  }
+  else {
+    printf ("{ \"num_points\": %d, \"k\": %e, \"d\": %e, \"dt\": %e, \"num_steps\": %d, \"step_chunk\": %d, \"hamiltonian_0\": %e }\n",
+            Np, k, d, dt, Nt, Nint, Hin);
+  }
 
-  time_loop = tic();
+
+  loop_timer = tic();
   for (int t = 0; t < Nt; t += Nint) {
-#if 0
-    if (basename) {write_step (Np, t / Nint, basename, x, y, z, Hout);}
-#endif
-
+    if (pipe) {write_step (Np, t * dt, (const double **)X);}
     /* execute the loop */
     verlet_step (Np, Nint, dt, k, d, &rand, X, U);
   }
-  toc(&time_loop);
+  loop_time = toc(&loop_timer);
+  if (pipe) {write_step (Np, Nt * dt, (const double **)X);}
   Hout = compute_hamiltonian (Np, k, (const double **)X, (const double **)U);
-  printf ("[%s] Hamiltonian, T = %g: %g, Relative Error: %g\n", argv[0], Nt * dt, Hout, fabs(Hout - Hin) / Hin);
   {
     double avgDist = 0.;
 
@@ -205,11 +214,16 @@ main (int argc, char **argv)
     }
     avgDist /= Np;
 
-    printf ("[%s] Average Distance Traveled: %g\n", argv[0], avgDist);
+    if (!pipe) {
+      printf ("[%s] Simulation time: %g\n", argv[0], loop_time);
+      printf ("[%s] Hamiltonian, T = %g: %g, Relative Error: %g\n", argv[0], Nt * dt, Hout, fabs(Hout - Hin) / Hin);
+      printf ("[%s] Average Distance Traveled: %g\n", argv[0], avgDist);
+    } else {
+      printf ("{ \"avg_dist\": %e, \"hamiltonian_T\": %e, \"hamiltionian_relerr\": %e, \"sim_time\": %e }\n",
+              avgDist, Hout, fabs(Hout - Hin) / Hin, loop_time);
+    }
   }
-#if 0
-  if (basename) {write_step (Np, Nt / Nint, basename, x, y, z, Hout);}
-#endif
+
   for (int d = 0; d < 3; d++) {
     free (U[d]);
     free (X[d]);
