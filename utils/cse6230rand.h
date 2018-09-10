@@ -7,12 +7,19 @@
 #include <math.h>
 #include <Random123/include/Random123/threefry.h>
 
+#if defined(M_PI)
+#define CSE6230_PI M_PI
+#else
+#define CSE6230_PI 3.1415926535897932384626433832795L
+#endif
+
 typedef struct _cse6230rand
 {
   threefry4x64_ctr_t c;
   threefry4x64_key_t k;
   threefry4x64_ctr_t r;
   size_t count;
+  size_t tag;
 }
 cse6230rand_t;
 
@@ -28,6 +35,7 @@ static inline void cse6230rand_seed(int seed, cse6230rand_t *restrict rand)
   rand->c.v[3] = 3;
   rand->r = threefry4x64(rand->c,rand->k);
   rand->count = 0;
+  rand->tag = 0;
 }
 
 static inline double cse6230rand(cse6230rand_t *restrict rand)
@@ -45,6 +53,36 @@ static inline double cse6230rand(cse6230rand_t *restrict rand)
   }
 
   return ret;
+}
+
+static inline size_t cse6230rand_get_tag(cse6230rand_t *restrict rand)
+{
+  return rand->tag++;
+}
+
+/* gives four random numbers for four indices */
+static inline void cse6230rand_hash(cse6230rand_t *restrict rand,
+                                    size_t tag,
+                                    size_t index1,
+                                    size_t index2,
+                                    size_t index3,
+                                    double rand_out[])
+{
+  const double scale = 1. / (UINT64_MAX + 1.);
+  const double shift = scale / 2.;
+  threefry4x64_ctr_t c;
+  threefry4x64_ctr_t r;
+  int i;
+
+  c.v[0] = tag;
+  c.v[1] = index1;
+  c.v[2] = index2;
+  c.v[3] = index3;
+
+  r = threefry4x64(c, rand->k);
+  for (i = 0; i < 4; i++) {
+    rand_out[i] = r.v[i] * scale + shift;
+  }
 }
 
 typedef struct _cse6230nrand
@@ -68,8 +106,8 @@ static inline void _cse6230nrand_batch(cse6230nrand_t *restrict nrand)
   for (int i = 0; i < 4; i += 2) {
     double u1 = nrand->z[i];
     double u2 = nrand->z[i+1];
-    double z1 = sqrt(-2. * log(u1)) * cos(M_PI * 2. * u2);
-    double z2 = sqrt(-2. * log(u1)) * sin(M_PI * 2. * u2);
+    double z1 = sqrt(-2. * log(u1)) * cos(CSE6230_PI * 2. * u2);
+    double z2 = sqrt(-2. * log(u1)) * sin(CSE6230_PI * 2. * u2);
     nrand->z[i]   = z1;
     nrand->z[i+1] = z2;
   }
