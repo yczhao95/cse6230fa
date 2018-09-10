@@ -4,7 +4,7 @@ include Makefile.$(MAKERULES)
 CPPFLAGS = -I../../utils -I../../utils/tictoc
 DEFINES =
 RM = rm -f
-LIBS = -lm
+LIBS = -lm -lrt
 LINKER = $(CC)
 
 all: cloud
@@ -20,9 +20,18 @@ all: cloud
 
 verlet.o: verlet.c verlet.h cloud.h
 
+verlet_stream_and_noise.o: verlet_stream_and_noise.c verlet.h cloud.h
+
+verlet_accelerate.o: verlet_accelerate.c verlet.h cloud.h
+
+verlet_accelerate2.o: verlet_accelerate2.c verlet.h cloud.h
+
 cloud.o: cloud.c verlet.h cloud.h
 
 cloud: verlet.o verlet_stream_and_noise.o verlet_accelerate.o cloud.o
+	$(LINKER) -o $@ $^ $(LIBS)
+
+cloud2: verlet.o verlet_stream_and_noise.o verlet_accelerate2.o cloud.o
 	$(LINKER) -o $@ $^ $(LIBS)
 
 PERF =
@@ -35,12 +44,16 @@ D=1.0
 NT=1000
 
 runcloud:
-	$(RM) cloud cloud.o verlet.o verlet_stream_and_noise.o verlet_accelerate.o
-	$(MAKE) verlet.o
+	$(MAKE) clean
 	$(MAKE) cloud
 	$(PERF) ./cloud $(NP) $(NT) $(DT) $(K) $(D)
 
-clean:
-	$(RM) *.o cloud
+runcloud2:
+	$(MAKE) clean
+	$(MAKE) cloud2
+	$(PERF) ./cloud2 $(NP) $(NT) $(DT) $(K) $(D)
 
-.PHONY: clean runcloud
+clean:
+	$(RM) *.o cloud cloud2
+
+.PHONY: clean runcloud runcloud2

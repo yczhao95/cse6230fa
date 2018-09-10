@@ -1,9 +1,9 @@
 
+#include <tictoc.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include <tictoc.h>
 #include <cse6230rand.h>
 #include "cloud.h"
 #include "verlet.h"
