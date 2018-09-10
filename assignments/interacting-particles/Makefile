@@ -7,7 +7,7 @@ RM = rm -f
 LIBS = -lm -lrt
 LINKER = $(CC)
 
-all: cloud
+all: cloud cloud2
 
 %.o: %.c
 	$(CC) -std=c99 $(CFLAGS) $(COPTFLAGS) $(CPPFLAGS) $(DEFINES) $(OMPFLAGS) -c -o $@ $<
