@@ -1,5 +1,5 @@
 
-CC = gcc-8 -std=c99
+CC = gcc -std=c99
 COPTFLAGS = -O3 -march=native
-OMPFLAGS = -fopenmp
+OMPFLAGS =
 CFLAGS = -g -Wall -fPIC

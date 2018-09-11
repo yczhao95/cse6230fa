@@ -28,37 +28,37 @@ verlet_accelerate2.o: verlet_accelerate2.c verlet.h cloud.h
 
 cloud.o: cloud.c verlet.h cloud.h
 
-cloud: verlet.o verlet_stream_and_noise.o verlet_accelerate.o cloud.o
+cloud: verlet.o verlet_stream_and_noise.o verlet_accelerate.o cloud.o initialize.o hamiltonian.o
 	$(LINKER) -o $@ $^ $(LIBS)
 
-cloud2: verlet.o verlet_stream_and_noise.o verlet_accelerate2.o cloud.o
+cloud2: verlet.o verlet_stream_and_noise.o verlet_accelerate2.o cloud.o initialize.o hamiltonian.o
 	$(LINKER) -o $@ $^ $(LIBS)
 
 PERF =
 STREAM_N = 1000000
 
 NP=64
-DT=0.01
-K=1.0
-D=1.0
+DT=1.e-3
+K=-1.0
+D=0.1
 NT=1000
 CHUNK=-1
 VIZNAME=cloud
 
 runcloud:
-	$(MAKE) clean
-	$(MAKE) cloud
+	$(MAKE) --silent clean
+	$(MAKE) --silent cloud
 	$(PERF) ./cloud $(NP) $(NT) $(DT) $(K) $(D)
 
 runcloud2:
-	$(MAKE) clean
-	$(MAKE) cloud2
+	$(MAKE) --silent clean
+	$(MAKE) --silent cloud2
 	$(PERF) ./cloud2 $(NP) $(NT) $(DT) $(K) $(D)
 
 vizcloud:
-	$(MAKE) clean
-	$(MAKE) cloud
-	./cloud $(NP) $(NT) $(DT) $(K) $(D) $(CHUNK) $(VIZNAME) | python3 cloud.py
+	$(MAKE) --silent clean
+	$(MAKE) --silent cloud
+	./cloud $(NP) $(NT) $(DT) $(K) $(D) $(CHUNK) $(VIZNAME) | xvfb-run python3 cloud.py
 
 clean:
 	$(RM) *.o cloud cloud2
