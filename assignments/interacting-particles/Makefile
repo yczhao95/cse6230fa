@@ -42,6 +42,8 @@ DT=0.01
 K=1.0
 D=1.0
 NT=1000
+CHUNK=-1
+VIZNAME=cloud
 
 runcloud:
 	$(MAKE) clean
@@ -53,7 +55,12 @@ runcloud2:
 	$(MAKE) cloud2
 	$(PERF) ./cloud2 $(NP) $(NT) $(DT) $(K) $(D)
 
+vizcloud:
+	$(MAKE) clean
+	$(MAKE) cloud
+	./cloud $(NP) $(NT) $(DT) $(K) $(D) $(CHUNK) $(VIZNAME) | python3 cloud.py
+
 clean:
 	$(RM) *.o cloud cloud2
 
-.PHONY: clean runcloud runcloud2
+.PHONY: clean runcloud runcloud2 vizcloud
