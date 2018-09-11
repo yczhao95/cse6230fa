@@ -24,7 +24,6 @@ potential (double k,
   double dx, dy, dz;
   double r2, ir;
 
-#if 1
   dx = remainder(x1 - x2, 1.);
   dy = remainder(y1 - y2, 1.);
   dz = remainder(z1 - z2, 1.);
@@ -32,11 +31,6 @@ potential (double k,
   dx = qdist(dx);
   dy = qdist(dy);
   dz = qdist(dz);
-#else
-  dx = x1 - x2;
-  dy = y1 - y2;
-  dz = z1 - z2;
-#endif
 
   r2 = dx*dx + dy*dy + dz*dz;
   ir = 1. / sqrt(r2);
@@ -56,7 +50,6 @@ force (double k,
   double qdx, qdy, qdz;
   double r2, ir3;
 
-#if 1
   dx = remainder(x1 - x2, 1.);
   dy = remainder(y1 - y2, 1.);
   dz = remainder(z1 - z2, 1.);
@@ -64,24 +57,13 @@ force (double k,
   qdx = qdist(dx);
   qdy = qdist(dy);
   qdz = qdist(dz);
-#else
-  qdx = x1 - x2;
-  qdy = y1 - y2;
-  qdz = z1 - z2;
-#endif
 
   r2 = qdx*qdx + qdy*qdy + qdz*qdz;
   ir3 = 1. / (sqrt(r2) * r2);
 
-#if 1
   f[0] = k * ir3 * qdx * dqdist(dx);
   f[1] = k * ir3 * qdy * dqdist(dy);
   f[2] = k * ir3 * qdz * dqdist(dz);
-#else
-  f[0] = k * ir3 * qdx;
-  f[1] = k * ir3 * qdy;
-  f[2] = k * ir3 * qdz;
-#endif
 }
 
 #endif

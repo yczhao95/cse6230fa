@@ -191,6 +191,7 @@ main (int argc, char **argv)
   loop_time = toc(&loop_timer);
   Hout = compute_hamiltonian (Np, k, (const double **)X, (const double **)U);
   if (gifname) {write_step (Np, Nt * dt, Hout, (const double **)X);}
+
   {
     double avgDist = 0.;
 
@@ -212,7 +213,8 @@ main (int argc, char **argv)
       printf ("[%s] Average Distance Traveled: %g\n", argv[0], avgDist);
     } else {
       printf ("{ \"avg_dist\": %e, \"hamiltonian_T\": %e, \"hamiltionian_relerr\": %e, \"sim_time\": %e }\n",
-              avgDist, Hout, fabs(Hout - Hin) / Hin, loop_time);
+              avgDist, Hout, Hin ? fabs(Hout - Hin) / Hin : 0., loop_time);
+      fflush(stdin);
     }
   }
 
