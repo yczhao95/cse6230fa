@@ -1,6 +1,8 @@
 #if !defined(STERIC_H)
 #define      STERIC_H
 
+#include <math.h>
+
 
 /* This kernel should be called if the distance between two particles is less
  * than twice the particle radius */

@@ -1,17 +1,17 @@
 
-#include <tictoc.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include <cse6230rand.h>
-#include "cloud.h"
-#include "verlet.h"
 #include "cloud_util.h"
+#include "initialize.h"
+#include "verlet.h"
 
 static int
-write_step (int Np, double L, double T, const double *X[3])
+write_step (Vector X, double L, double T)
 {
+  int Np = X->Np;
   printf ("{\"num_points\":%d,", Np);
   printf ("\"domain_width\":%g,", L);
   printf ("\"time\":%g,", T);
@@ -19,9 +19,9 @@ write_step (int Np, double L, double T, const double *X[3])
   for (int d=0; d < 3; d++) {
     printf ("[");
     for (int l = 0; l < Np - 1; l++) {
-      printf ("%9.2e,", X[d][l]);
+      printf ("%9.2e,", IDX(X,d,l));
     }
-    if (Np) {printf ("%9.2e]", X[d][Np - 1]);}
+    if (Np) {printf ("%9.2e]", IDX(X,d,Np - 1));}
     if (d < 2) {
       printf (",");
     }
@@ -69,23 +69,22 @@ main (int argc, char **argv)
   double d;
   double L;
   double r;
-  double *X0[3];
-  double *X[3], *U[3];
+  Vector X0, X, U;
+  Verlet Vr;
+  Accel  Ac;
   int seed = 6230;
   const char *gifname = NULL;
   cse6230rand_t rand;
 
   err = process_options (argc, argv, &Np, &Nt, &Nint, &dt, &k, &d, &L, &r, &gifname);CHK(err);
 
-  for (int d = 0; d < 3; d++) {
-    err = safeMALLOC (Np * sizeof (double), &X0[d]);CHK(err);
-    err = safeMALLOC (Np * sizeof (double), &X[d]);CHK(err);
-    err = safeMALLOC (Np * sizeof (double), &U[d]);CHK(err);
-  }
+  err = VectorCreate(Np, &X0);CHK(err);
+  err = VectorCreate(Np, &X);CHK(err);
+  err = VectorCreate(Np, &U);CHK(err);
 
   cse6230rand_seed (seed, &rand);
 
-  initialize_positions (Np, k, L, &rand, X0, X);
+  initialize_positions (X0, X, L, &rand);
 
   if (!gifname) {
     printf ("[%s] NUM_POINTS=%d, NUM_STEPS=%d, CHUNK_SIZE=%d, DT=%g, K=%g, D=%g, L=%g, R=%g\n", argv[0], Np, Nt, Nint, dt, k, d, L, r);
@@ -105,19 +104,24 @@ main (int argc, char **argv)
     fflush(stdout);
   }
 
+  err = VerletCreate(&Vr);CHK(err);
+  err = VerletSetNoise(Vr, &rand, d);CHK(err);
+  err = AccelCreate(Np, L, k, r, &Ac);CHK(err);
+  err = VerletSetAccel(Vr, Ac);CHK(err);
+
   for (int t = 0; t < Nt; t += Nint) {
     if (gifname) {
-      write_step (Np, t * dt, L, (const double **)X);
+      write_step (X, t * dt, L);
     }
     /* execute the loop */
-    verlet_step (Np, Nint, dt, k, d, r, L, &rand, X, U);
+    verlet_step (Vr, Nint, dt, X, U);
   }
-  if (gifname) {write_step (Np, Nt * dt, L, (const double **)X);}
+  if (gifname) {write_step (X, Nt * dt, L);}
 
-  for (int d = 0; d < 3; d++) {
-    free (U[d]);
-    free (X[d]);
-    free (X0[d]);
-  }
+  err = AccelDestroy(&Ac);CHK(err);
+  err = VerletDestroy(&Vr);CHK(err);
+  err = VectorDestroy(&U);CHK(err);
+  err = VectorDestroy(&X);CHK(err);
+  err = VectorDestroy(&X0);CHK(err);
   return 0;
 }

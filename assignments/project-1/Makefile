@@ -18,15 +18,7 @@ all: cloud
 %.o: %.cu
 	$(NVCC) $(NVCCFLAGS) $(CUOPTFLAGS) -dc -o $@ $<
 
-verlet.o: verlet.c verlet.h cloud.h
-
-stream_and_noise.o: stream_and_noise.c verlet.h cloud.h
-
-accelerate.o: accelerate.c verlet.h cloud.h
-
-cloud.o: cloud.c verlet.h cloud.h
-
-cloud: verlet.o stream_and_noise.o accelerate.o cloud.o initialize.o
+cloud: verlet.o accelerate.o cloud.o initialize.o vector.o cloud_util.o
 	$(LINKER) -o $@ $^ $(LIBS)
 
 PERF =
