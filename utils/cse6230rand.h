@@ -85,6 +85,39 @@ static inline void cse6230rand_hash(cse6230rand_t *restrict rand,
   }
 }
 
+/* gives three normally distributed random numbers from four indices */
+static inline void cse6230rand_normal_hash(cse6230rand_t *restrict rand,
+                                           size_t tag,
+                                           size_t index1,
+                                           size_t index2,
+                                           size_t index3,
+                                           double rand_out[])
+{
+  const double scale = 1. / (UINT64_MAX + 1.);
+  const double shift = scale / 2.;
+  threefry4x64_ctr_t c;
+  threefry4x64_ctr_t r;
+  int i;
+
+  c.v[0] = tag;
+  c.v[1] = index1;
+  c.v[2] = index2;
+  c.v[3] = index3;
+
+  r = threefry4x64(c, rand->k);
+  for (i = 0; i < 4; i++) {
+    urand[i] = r.v[i] * scale + shift;
+  }
+  for (int i = 0; i < 4; i += 2) {
+    double u1 = r.v[i] * scale + shift;
+    double u2 = r.v[i+1] * scale + shift;
+    double z1 = sqrt(-2. * log(u1)) * cos(CSE6230_PI * 2. * u2);
+    double z2 = sqrt(-2. * log(u1)) * sin(CSE6230_PI * 2. * u2);
+    rand_out[i] = z1;
+    rand_out[i+1] = z2;
+  }
+}
+
 typedef struct _cse6230nrand
 {
   cse6230rand_t urand;
