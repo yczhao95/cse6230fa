@@ -5,9 +5,9 @@ CPPFLAGS = -I../../utils -I../../utils/tictoc
 DEFINES =
 RM = rm -f
 LIBS = -lm -lrt
-LINKER = $(CC)
+LINKER = $(CC) $(OMPFLAGS)
 
-all: cloud cloud2
+all: cloud
 
 %.o: %.c
 	$(CC) -std=c99 $(CFLAGS) $(COPTFLAGS) $(CPPFLAGS) $(DEFINES) $(OMPFLAGS) -c -o $@ $<
@@ -20,47 +20,44 @@ all: cloud cloud2
 
 verlet.o: verlet.c verlet.h cloud.h
 
-verlet_stream_and_noise.o: verlet_stream_and_noise.c verlet.h cloud.h
+stream_and_noise.o: stream_and_noise.c verlet.h cloud.h
 
-verlet_accelerate.o: verlet_accelerate.c verlet.h cloud.h
-
-verlet_accelerate2.o: verlet_accelerate2.c verlet.h cloud.h
+accelerate.o: accelerate.c verlet.h cloud.h
 
 cloud.o: cloud.c verlet.h cloud.h
 
-cloud: verlet.o verlet_stream_and_noise.o verlet_accelerate.o cloud.o initialize.o hamiltonian.o
-	$(LINKER) -o $@ $^ $(LIBS)
-
-cloud2: verlet.o verlet_stream_and_noise.o verlet_accelerate2.o cloud.o initialize.o hamiltonian.o
+cloud: verlet.o stream_and_noise.o accelerate.o cloud.o initialize.o
 	$(LINKER) -o $@ $^ $(LIBS)
 
 PERF =
 STREAM_N = 1000000
 
-NP=64
-DT=1.e-3
-K=-1.0
-D=0.1
+NP=257
+DT=1.e-4
+K=100.
+D=1.
+L=20.810992
+R=1.
 NT=1000
-CHUNK=-1
+CHUNK=1000
 VIZNAME=cloud
 
 runcloud:
 	$(MAKE) --silent clean
 	$(MAKE) --silent cloud
-	$(PERF) ./cloud $(NP) $(NT) $(DT) $(K) $(D)
-
-runcloud2:
-	$(MAKE) --silent clean
-	$(MAKE) --silent cloud2
-	$(PERF) ./cloud2 $(NP) $(NT) $(DT) $(K) $(D)
+	$(PERF) ./cloud $(NP) $(NT) $(DT) $(K) $(D) $(L) $(R)
 
 vizcloud:
 	$(MAKE) --silent clean
 	$(MAKE) --silent cloud
-	./cloud $(NP) $(NT) $(DT) $(K) $(D) $(CHUNK) $(VIZNAME) | xvfb-run python3 cloud.py
+	./cloud $(NP) $(NT) $(DT) $(K) $(D) $(L) $(R) $(CHUNK) $(VIZNAME) | xvfb-run python3 viz.py
+
+checkcloud:
+	$(MAKE) --silent clean
+	$(MAKE) --silent cloud
+	./cloud $(NP) $(NT) $(DT) $(K) $(D) $(L) $(R) $(CHUNK) check | python3 check.py
 
 clean:
-	$(RM) *.o cloud cloud2
+	$(RM) *.o cloud
 
-.PHONY: clean runcloud runcloud2 vizcloud
+.PHONY: clean runcloud vizcloud checkcloud

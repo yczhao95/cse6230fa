@@ -97,7 +97,6 @@ static inline void cse6230rand_normal_hash(cse6230rand_t *restrict rand,
   const double shift = scale / 2.;
   threefry4x64_ctr_t c;
   threefry4x64_ctr_t r;
-  int i;
 
   c.v[0] = tag;
   c.v[1] = index1;
@@ -105,9 +104,6 @@ static inline void cse6230rand_normal_hash(cse6230rand_t *restrict rand,
   c.v[3] = index3;
 
   r = threefry4x64(c, rand->k);
-  for (i = 0; i < 4; i++) {
-    urand[i] = r.v[i] * scale + shift;
-  }
   for (int i = 0; i < 4; i += 2) {
     double u1 = r.v[i] * scale + shift;
     double u2 = r.v[i+1] * scale + shift;
