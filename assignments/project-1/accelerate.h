@@ -5,7 +5,7 @@
 
 typedef struct _accel_t *Accel;
 
-int AccelCreate(int Np, double L, double k, double r, Accel *accel);
+int AccelCreate(int Np, double L, double k, double r, int use_ix, Accel *accel);
 int AccelDestroy(Accel *accel);
 
 void

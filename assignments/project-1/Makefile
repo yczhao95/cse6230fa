@@ -18,7 +18,7 @@ all: cloud
 %.o: %.cu
 	$(NVCC) $(NVCCFLAGS) $(CUOPTFLAGS) -dc -o $@ $<
 
-cloud: verlet.o accelerate.o cloud.o initialize.o vector.o cloud_util.o
+cloud: verlet.o accelerate.o cloud.o initialize.o vector.o cloud_util.o interactions.o
 	$(LINKER) -o $@ $^ $(LIBS)
 
 PERF =

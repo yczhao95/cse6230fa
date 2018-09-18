@@ -106,17 +106,20 @@ main (int argc, char **argv)
 
   err = VerletCreate(&Vr);CHK(err);
   err = VerletSetNoise(Vr, &rand, d);CHK(err);
-  err = AccelCreate(Np, L, k, r, &Ac);CHK(err);
+
+  int use_ix = 1;
+  err = AccelCreate(Np, L, k, r, use_ix, &Ac);CHK(err);
+
   err = VerletSetAccel(Vr, Ac);CHK(err);
 
   for (int t = 0; t < Nt; t += Nint) {
     if (gifname) {
-      write_step (X, t * dt, L);
+      write_step (X, L, t * dt);
     }
     /* execute the loop */
     verlet_step (Vr, Nint, dt, X, U);
   }
-  if (gifname) {write_step (X, Nt * dt, L);}
+  if (gifname) {write_step (X, L, Nt * dt);}
 
   err = AccelDestroy(&Ac);CHK(err);
   err = VerletDestroy(&Vr);CHK(err);

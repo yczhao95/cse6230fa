@@ -22,7 +22,7 @@ force_in_range (double k, /* The interaction strength (may be scaled by the time
   f[2] = k * strength * dz;
 }
 
-/* get the distance and displacement between two particles under periodic
+/* get the square distance and displacement between two particles under periodic
  * conditions */
 static inline double
 dist_and_disp (double x1, double y1, double z1, /* The center of the first particle */
@@ -56,6 +56,8 @@ force (double k, /* The interaction strength (may be scaled by the time step alr
    * interact */
   if (R2 < r2) {
     double R = sqrt(R2);
+
+    //printf("(%g,%g,%g)(%g,%g,%g)\n",x1, y1, z1, x2, y2, z2);
 
     force_in_range (k, r, R, dx, dy, dz, f);
   }
