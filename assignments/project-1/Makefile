@@ -24,11 +24,11 @@ cloud: verlet.o accelerate.o cloud.o initialize.o vector.o cloud_util.o interact
 PERF =
 STREAM_N = 1000000
 
-NP=257
+NP=256
 DT=1.e-4
 K=100.
 D=1.
-L=20.810992
+L=20.
 R=1.
 NT=1000
 CHUNK=1000

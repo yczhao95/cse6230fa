@@ -22,7 +22,6 @@ if __name__ == "__main__":
     accum = np.zeros((maxinterv,1))
     denom = np.zeros((maxinterv,1))
     for i in range(numframes):
-        print(i)
         try:
             line = sys.stdin.readline()
             obj = json.loads(line)
