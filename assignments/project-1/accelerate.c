@@ -5,6 +5,7 @@
 void
 accelerate (int Np, double k, double r, double L, const double *restrict X[3], double *restrict U[3])
 {
+  #pragma omp for schedule(static)
   for (int i = 0; i < Np; i++) {
     double u[3] = {0.};
 

@@ -10,7 +10,7 @@ stream_and_noise (int Np, double dt_stream, double dt_noise,
   size_t tag;
 
   tag = cse6230rand_get_tag (rand);
-
+  #pragma omp for schedule(static)
   for (int i = 0; i < Np; i+= 4) {
     double rval[3][4];
 

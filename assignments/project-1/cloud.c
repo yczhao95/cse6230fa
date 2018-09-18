@@ -89,6 +89,15 @@ main (int argc, char **argv)
 
   if (!gifname) {
     printf ("[%s] NUM_POINTS=%d, NUM_STEPS=%d, CHUNK_SIZE=%d, DT=%g, K=%g, D=%g, L=%g, R=%g\n", argv[0], Np, Nt, Nint, dt, k, d, L, r);
+    {
+      double pr_vol = (4./3.) * CSE6230_PI * r*r*r;
+      double domain_vol = L*L*L;
+      double vol_frac = pr_vol * Np / domain_vol;
+      double interact_vol = 8. * pr_vol;
+      double exp_ints_per = Np * interact_vol / domain_vol;
+      printf("With %d particles of radius 1 and a box width of %f, the volume fraction is %g.\n",Np,L,vol_frac);
+      printf("The interaction volume is %g, so we expect %g interactions per particle, %g overall.\n",interact_vol,exp_ints_per,exp_ints_per * Np / 2.);
+    }
   }
   else {
     printf ("{ \"num_points\": %d, \"k\": %e, \"d\": %e, \"r\": %e, \"L\": %e, \"dt\": %e, \"num_steps\": %d, \"step_chunk\": %d, \"gifname\":\"%s\" }\n",

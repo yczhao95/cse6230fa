@@ -7,6 +7,7 @@ initialize_positions (int Np, double k, double L, cse6230rand_t *rand, double *X
   size_t init_tag;
 
   init_tag = cse6230rand_get_tag (rand);
+  #pragma omp parallel for schedule(static)
   for (int i = 0; i < Np; i+=4) { /* for every particle */
     double xval[3][4];
 
