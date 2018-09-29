@@ -1,11 +1,16 @@
 
 MAKERULES=intel
 include Makefile.$(MAKERULES)
+CC = icc
+COPTFLAGS = -O -qopt-report=3
+CFLAGS = -g -Wall -fPIC
 CPPFLAGS = -I../../utils -I../../utils/tictoc
+OMPFLAGS = -openmp
 DEFINES =
 RM = rm -f
 LIBS = -lm -lrt
-LINKER = $(CC)
+LINKER = $(CC) $(OMPFLAGS)
+OMPENV = OMP_NUM_THREADS=$(PBS_NP)
 
 all: cloud cloud2
 
@@ -37,7 +42,7 @@ cloud2: verlet.o verlet_stream_and_noise.o verlet_accelerate2.o cloud.o initiali
 PERF =
 STREAM_N = 1000000
 
-NP=64
+NP=128
 DT=1.e-3
 K=-1.0
 D=0.1

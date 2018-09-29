@@ -1,20 +1,21 @@
-
+#include <omp.h>
 #include "cloud.h"
 
 void
 initialize_variables (int Np, double k, cse6230rand_t *rand, double *X0[3], double *X[3], double *U[3])
 {
-  size_t init_tag;
-
-  init_tag = cse6230rand_get_tag (rand);
+#pragma omp parallel for
   for (int i = 0; i < Np; i+=4) { /* for every particle */
-    double xval[3][4];
-    double uval[3][4];
+	  cse6230rand_t safe_rand = *rand;
+	  size_t init_tag;
+	  init_tag = cse6230rand_get_tag (&safe_rand);
+	  double xval[3][4];
+	  double uval[3][4];
 
-    for (int d = 0; d < 3; d++) { /* get four random doubles for each variable */
-      cse6230rand_hash (rand, init_tag, i,     d, 0, &xval[d][0]);
-      if (k) {
-        cse6230rand_hash (rand, init_tag, i, 3 + d, 0, &uval[d][0]);
+	  for (int d = 0; d < 3; d++) { /* get four random doubles for each variable */
+		  cse6230rand_hash (&safe_rand, init_tag, i,     d, 0, &xval[d][0]);
+		  if (k) {
+        cse6230rand_hash (&safe_rand, init_tag, i, 3 + d, 0, &uval[d][0]);//check if this function can be called with multi process;
       }
       else {
         for (int j = 0; j < 4; j++) {
