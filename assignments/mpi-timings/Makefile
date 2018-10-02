@@ -1,6 +1,6 @@
 
 MPICC    = mpicc
-CFLAGS   = -g -Wall -O3
+CFLAGS   = -g -Wall -O3 -std=c99
 CPPFLAGS = 
 LIBS     = 
 
