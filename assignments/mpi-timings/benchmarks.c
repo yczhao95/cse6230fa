@@ -127,7 +127,36 @@ int main(int argc, char **argv)
         err = startTime(comm, &tic); MPI_CHK(err);
         if (rank < numComm) {
           if (rank % 2) {
-            err = MPI_Ssend(buffer, numBytes, MPI_BYTE, rank - 1, 0, comm); MPI_CHK(err);
+            err = MPI_Send(buffer, numBytes, MPI_BYTE, rank - 1, 0, comm); MPI_CHK(err);
+          } else {
+            err = MPI_Recv (buffer, numBytes, MPI_BYTE, rank + 1, 0, comm, MPI_STATUS_IGNORE); MPI_CHK(err);
+          }
+        }
+        err = stopTime(tic, &tic); MPI_CHK(err);
+        if (t) {
+          timeAvg += tic;
+        }
+      }
+      timeAvg /= (numTests - 1);
+      MPI_LOG(rank, " %12d   %12d   %12lld   %+12.5e   %+12.5e\n", numComm, numBytes, totalNumBytes, timeAvg, totalNumBytes / timeAvg);
+    }
+  }
+
+  /* === POINT TO POINT TIMINGS === */
+  MPI_LOG(rank, "MPI Point-to-point synchronous test:\n"
+          " # Processes  | Message Size | Total Size   | Time         | B/s\n");
+  for (int numComm = 4; numComm <= size; numComm *= 4) {
+    for (int numBytes = 8; numBytes <= maxSize; numBytes *= 8) {
+      double        timeAvg = 0.;
+      long long int totalNumBytes = numBytes * (numComm / 2);
+
+      for (int t = 0; t < numTests; t++) {
+        double tic = -1.;
+
+        err = startTime(comm, &tic); MPI_CHK(err);
+        if (rank < numComm) {
+          if (rank % 2) {
+            /* TODO: Send the bytes as above, but synchronously, so that it blocks until the * matching receive has posted */
           } else {
             err = MPI_Recv (buffer, numBytes, MPI_BYTE, rank + 1, 0, comm, MPI_STATUS_IGNORE); MPI_CHK(err);
           }
