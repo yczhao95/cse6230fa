@@ -283,14 +283,17 @@ main (int argc, char **argv)
     double time = -MPI_Wtime();
 
     for (int t = 0; t < nt; t++) {
+      MPI_Request req[12];
       /* update halos */
       for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 2; j++) {
-          err = MPI_Sendrecv (u, 1, sendtype[i][j],   neigh[i][j],   i * 2 + j,
-                              u, 1, recvtype[i][j^1], neigh[i][j^1], i * 2 + j,
-                              cartcomm, MPI_STATUS_IGNORE); MPI_CHK(err);
+          err = MPI_Isend (u, 1, sendtype[i][j], neigh[i][j], i * 2 + j,
+                           cartcomm, &req[2 * (i * 2 + j)]); MPI_CHK(err);
+          err = MPI_Irecv (u, 1, recvtype[i][j^1], neigh[i][j^1], i * 2 + j,
+                           cartcomm, &req[2 * (i * 2 + j) + 1]); MPI_CHK(err);
         }
       }
+      err = MPI_Waitall(12, req, MPI_STATUSES_IGNORE); MPI_CHK(err);
       jacobi_sweep (bl, (const double ***) F, U);
     }
     time += MPI_Wtime();
