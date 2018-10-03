@@ -33,6 +33,45 @@ do {                                                             \
   }                                                              \
 } while (0)
 
+void
+jacobi_sweep (const int bl[], const double ***F, double ***U)
+{
+  double **Ux[3];
+
+  for (int d = 0; d < 3; d++) {
+    Ux[d] = U[d - 1];
+  }
+  for (int i = 0; i < bl[0]; i++) {
+    double *restrict Uxy[3][3];
+    const double **Fx = F[i];
+
+    for (int d = 0; d < 3; d++) {
+      for (int e = 0; e < 3; e++) {
+        Uxy[d][e] = Ux[d][e - 1];
+      }
+    }
+    for (int j = 0; j < bl[1]; j++) {
+      const double *restrict Fxy = Fx[j];
+      for (int k = 0; k < bl[2]; k++) {
+        Uxy[1][1][k] = (1./6.) * (Fxy[k] + Uxy[0][1][k] +
+                                           Uxy[2][1][k] +
+                                           Uxy[1][0][k] +
+                                           Uxy[1][2][k] +
+                                           Uxy[1][1][k-1] +
+                                           Uxy[1][1][k+1]);
+      }
+      for (int d = 0; d < 3; d++) {
+        Uxy[d][0] = Uxy[d][1];
+        Uxy[d][1] = Uxy[d][2];
+        Uxy[d][2] = Ux [d][j+2];
+      }
+    }
+    Ux[0] = Ux[1];
+    Ux[1] = Ux[2];
+    Ux[2] = U [i+2];
+  }
+}
+
 int
 main (int argc, char **argv)
 {
@@ -238,13 +277,25 @@ main (int argc, char **argv)
   }
 
   /* jacobi sweeps */
-  for (int t = 0; t < nt; t++) {
-    for (int i = 0; i < 3; i++) {
-      for (int j = 0; j < 2; j++) {
-        err = MPI_Sendrecv (u, 1, sendtype[i][j],   neigh[i][j],   i * 2 + j,
-                            u, 1, recvtype[i][j^1], neigh[i][j^1], i * 2 + j,
-                            cartcomm, MPI_STATUS_IGNORE); MPI_CHK(err);
+  {
+    double time = -MPI_Wtime();
+
+    for (int t = 0; t < nt; t++) {
+      /* update halos */
+      for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 2; j++) {
+          err = MPI_Sendrecv (u, 1, sendtype[i][j],   neigh[i][j],   i * 2 + j,
+                              u, 1, recvtype[i][j^1], neigh[i][j^1], i * 2 + j,
+                              cartcomm, MPI_STATUS_IGNORE); MPI_CHK(err);
+        }
       }
+      jacobi_sweep (bl, (const double ***) F, U);
+    }
+    time += MPI_Wtime();
+
+    if (!rank) {
+      printf ("Sweep time: %g seconds\n", time);
+      printf ("Rate: %g lattice updates per second\n", (b[0] * b[1] * b[2] * nt) / time);
     }
   }
 
