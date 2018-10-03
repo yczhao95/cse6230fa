@@ -36,14 +36,15 @@ do {                                                             \
 void
 jacobi_sweep (const int bl[], const double ***F, double ***U)
 {
-  double **Ux[3];
-
-  for (int d = 0; d < 3; d++) {
-    Ux[d] = U[d - 1];
-  }
+  #pragma omp parallel for schedule(static)
   for (int i = 0; i < bl[0]; i++) {
+    double **Ux[3];
     double *restrict Uxy[3][3];
     const double **Fx = F[i];
+
+    Ux[0] = U[i-1];
+    Ux[1] = U[i];
+    Ux[2] = U[i+1];
 
     for (int d = 0; d < 3; d++) {
       for (int e = 0; e < 3; e++) {
@@ -66,9 +67,6 @@ jacobi_sweep (const int bl[], const double ***F, double ***U)
         Uxy[d][2] = Ux [d][j+2];
       }
     }
-    Ux[0] = Ux[1];
-    Ux[1] = Ux[2];
-    Ux[2] = U [i+2];
   }
 }
 
@@ -96,7 +94,7 @@ main (int argc, char **argv)
   MPI_Comm comm, cartcomm;
 
   /* The first thing in every MPI program */
-  err = MPI_Init (&argc, &argv);
+  err = MPI_Init_thread (&argc, &argv, MPI_THREAD_FUNNELED, NULL);
   if (err != MPI_SUCCESS) {
     printf ("MPI initialization failed!\n");
     return err;
@@ -215,6 +213,7 @@ main (int argc, char **argv)
   nbh = bh[0] * bh[1] * bh[2];
   err = safeMALLOC (nbh * sizeof (double), &f); CHK(err);
   err = safeMALLOC (nbh * sizeof (double), &u); CHK(err);
+  #pragma omp parallel for schedule(static)
   for (int i = 0; i < nbh; i++) {
     f[i] = 0.;
     u[i] = 0.;
@@ -227,6 +226,9 @@ main (int argc, char **argv)
   for (int i = 0; i < bh[0]; i++) {
     err = safeMALLOC (bh[1] * sizeof (double *), &U[i]); CHK(err);
     err = safeMALLOC (bh[1] * sizeof (double *), &F[i]); CHK(err);
+  }
+  #pragma omp parallel for schedule(static)
+  for (int i = 0; i < bh[0]; i++) {
     for (int j = 0; j < bh[1]; j++) {
       /* set U[i][j] / F[i][j] to point at the first non ghost boxes
        * in the 3D array */
@@ -295,7 +297,7 @@ main (int argc, char **argv)
 
     if (!rank) {
       printf ("Sweep time: %g seconds\n", time);
-      printf ("Rate: %g lattice updates per second\n", (b[0] * b[1] * b[2] * nt) / time);
+      printf ("Rate: %g lattice updates per second\n", ((double) b[0] * (double) b[1] * (double) b[2] * (double) nt) / time);
     }
   }
 
