@@ -5,9 +5,9 @@ CFLAGS   = -g -Wall -O3 -xHost -std=c99
 CPPFLAGS = -I../../utils
 LIBS     =
 
-MPIRUN    = mpirun
-N         = 4
-MPIRUNCMD = $(MPIRUN) -np $(N)
+MPIRUN    = mpiexec
+N         = ${PBS_NP}
+MPIRUNCMD = $(MPIRUN) -bind-to core
 
 RM       = rm -f
 
@@ -23,7 +23,7 @@ poisson: poisson.o jacobi.o cloud_util.o
 	$(MPICC) -o $@ $^ $(LIBS)
 
 runbenchmarks: benchmarks
-	$(MPIRUNCMD) $(abspath $<)
+	$(MPIRUNCMD) -n $(N) ./benchmarks | xvfb-run python figgen.py
 
 MPI_X=1
 MPI_Y=1
@@ -40,7 +40,7 @@ MPI_N=1
 OMP_N=1
 
 runpoisson: poisson
-	OMP_NUM_THREADS=$(OMP_N) OMP_PROC_BIND=spread mpiexec -bind-to core -n $(MPI_N) ./poisson $(MPI_X) $(MPI_Y) $(MPI_Z) $(OMP_X) $(OMP_Y) $(OMP_Z) $(BX) $(BY) $(BZ) $(NP) $(NT)
+	OMP_NUM_THREADS=$(OMP_N) OMP_PROC_BIND=spread $(MPIRUNCMD) -n $(MPI_N) ./poisson $(MPI_X) $(MPI_Y) $(MPI_Z) $(OMP_X) $(OMP_Y) $(OMP_Z) $(BX) $(BY) $(BZ) $(NP) $(NT)
 
 runpoissonomp: poisson
 	OMP_NUM_THREADS=$(OMP_N) OMP_PROC_BIND=true ./poisson 1 1 1 $(OMP_X) $(OMP_Y) $(OMP_Z) $(BX) $(BY) $(BZ) $(NP) $(NT)

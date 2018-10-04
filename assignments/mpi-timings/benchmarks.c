@@ -161,9 +161,9 @@ int main(int argc, char **argv)
         err = startTime(comm, &tic); MPI_CHK(err);
         if (rank < numComm) {
           /* TODO: Use the subComm communicator to broadcast from rank 0 the
-           * first `numBytes` bytes of the `buffer` to the other processes. Store
-           * the results in the first `numBytes` bytes of the `buffer` on the
-           * receiving processes. */
+           * first `numBytes` bytes of the `buffer` to the other subComm
+           * processes. Store the results in the first `numBytes` bytes of the
+           * `buffer` on the receiving processes. */
         }
         err = stopTime(tic, &tic); MPI_CHK(err);
         if (t) {
