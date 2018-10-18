@@ -2,6 +2,7 @@
 #if !defined(DMV_H)
 #define      DMV_H
 
+#include <stdlib.h>
 #include <mpi.h>
 #include <stdio.h>
 #include <Random123/threefry.h>
