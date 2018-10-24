@@ -384,7 +384,7 @@ main (int argc, char **argv)
     if (!rank) {
       printf ("Sweep time: %g seconds (%g seconds communication)\n", time, srtime);
       printf ("Rate: %g lattice updates per second\n", ((double) b[0] * (double) b[1] * (double) b[2] * (double) nt) / time);
-      printf ("Rate: %g halo exchanges per MPI process per second\n", (double) nt / (double) size / srtime);
+      printf ("Rate: %g halo exchanges per MPI process per second\n", (double) nt / srtime);
     }
   }
 
