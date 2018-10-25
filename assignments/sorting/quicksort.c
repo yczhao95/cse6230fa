@@ -249,7 +249,7 @@ static int Proj2SorterSort_quicksort_recursive(Proj2Sorter sorter, MPI_Comm comm
   return 0;
 }
 
-int Proj2SorterSort_quicksort(Proj2Sorter sorter, size_t numKeysLocal, uint64_t *keys)
+int Proj2SorterSort_quicksort(Proj2Sorter sorter, size_t numKeysLocal, int uniform, uint64_t *keys)
 {
   int      err;
 

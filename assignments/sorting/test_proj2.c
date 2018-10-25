@@ -53,7 +53,7 @@ static int Proj2IsSorted(MPI_Comm comm, size_t numKeysLocal, const uint64_t *key
   return 0;
 }
 
-static int testSorter(MPI_Comm comm, Proj2Sorter sorter, int numTests, size_t numKeysLocal, threefry4x64_key_t *tfkey, threefry4x64_ctr_t *ctr,
+static int testSorter(MPI_Comm comm, Proj2Sorter sorter, int numTests, size_t numKeysLocal, threefry4x64_key_t *tfkey, threefry4x64_ctr_t *ctr, int uniform,
                       double *avgBW_p)
 {
   uint64_t *keys, *keysCopy;
@@ -96,7 +96,7 @@ static int testSorter(MPI_Comm comm, Proj2Sorter sorter, int numTests, size_t nu
     memcpy(keys,keysCopy,numKeysLocal*sizeof(*keys));
     err = MPI_Barrier(comm); PROJ2CHK(err);
     tic = MPI_Wtime();
-    err = Proj2SorterSort(sorter, numKeysLocal, keys); PROJ2CHK(err);
+    err = Proj2SorterSort(sorter, numKeysLocal, uniform, keys); PROJ2CHK(err);
     toc = MPI_Wtime();
     err = Proj2IsSorted(comm, numKeysLocal, keys, &isSorted); PROJ2CHK(err);
     if (!isSorted) PROJ2ERR(comm, 4, "Array not sorted: numKeysLocal %zu, testNum %d\n", numKeysLocal, i);
@@ -123,10 +123,12 @@ int main(int argc, char **argv)
   int                 numTests = 0;
   double              harmAvg = 0.;
   int                 numReps = 2;
+  int                 uniform = 1;
+  int                 rank;
 
   err = MPI_Init(&argc,&argv); if (err) return err;
-  if (argc != 6) {
-    fprintf(stderr, "Usage: %s MIN_KEYS_PER_PROCESS MAX_KEYS_PER_PROCESS MULTIPLIER SEED NUM_REPS\n", argv[0]);
+  if (argc != 7) {
+    fprintf(stderr, "Usage: %s MIN_KEYS_PER_PROCESS MAX_KEYS_PER_PROCESS MULTIPLIER SEED NUM_REPS UNIFORM\n", argv[0]);
     return 1;
   }
   minKeys = atoi(argv[1]);
@@ -134,20 +136,33 @@ int main(int argc, char **argv)
   mult    = atoi(argv[3]);
   seed    = atoi(argv[4]);
   numReps = atoi(argv[5]);
+  uniform = atoi(argv[6]);
 
   if (mult < 2) mult = 2;
   if (numReps < 2) numReps = 2;
 
-  PROJ2LOG(MPI_COMM_WORLD, "%s minKeys %d maxKeys %d mult %d seed %d\n", argv[0], minKeys, maxKeys, mult, seed);
+  PROJ2LOG(MPI_COMM_WORLD, "%s minKeys %d maxKeys %d mult %d seed %d uniform %d\n", argv[0], minKeys, maxKeys, mult, seed, uniform);
 
   /* seed the random number generator */
   ukey.v[0] = seed;
   tfkey = threefry4x64keyinit(ukey);
   err = Proj2SorterCreate(MPI_COMM_WORLD, &sorter); PROJ2CHK(err);
+  err = MPI_Comm_rank(MPI_COMM_WORLD, &rank); PROJ2CHK(err);
   for (size_t numKeysLocal = minKeys; numKeysLocal <= maxKeys; numKeysLocal *= mult, numTests++) {
-    double avgBW = 0.;
 
-    err = testSorter(MPI_COMM_WORLD, sorter, numReps, numKeysLocal, &tfkey, &ctr, &avgBW); PROJ2CHK(err);
+    double avgBW = 0.;
+    size_t num_added_keys = 0;
+
+    if (!uniform) {
+      threefry4x64_ctr_t rand;
+
+      ctr.v[0] = numKeysLocal;
+      ctr.v[1] = rank;
+      rand = threefry4x64(tfkey,ctr);
+      num_added_keys = rand.v[0] % numKeysLocal;
+    }
+
+    err = testSorter(MPI_COMM_WORLD, sorter, numReps, numKeysLocal + num_added_keys, &tfkey, &ctr, uniform, &avgBW); PROJ2CHK(err);
     harmAvg += 1. / avgBW;
   }
   harmAvg = numTests / harmAvg;

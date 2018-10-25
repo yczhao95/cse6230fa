@@ -24,6 +24,6 @@ struct _proj2sorter
  * communicating partner on the other half of the communicator.  Once the
  * pivot is known, each partner sends its entries less than the pivot to the
  * lower of the pair and the others to the greater of the pair. */
-int Proj2SorterSort_quicksort(Proj2Sorter sorter, size_t numKeysLocal, uint64_t *keys);
+int Proj2SorterSort_quicksort(Proj2Sorter sorter, size_t numKeysLocal, int uniform, uint64_t *keys);
 
 #endif

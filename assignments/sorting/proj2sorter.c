@@ -86,18 +86,17 @@ int Proj2SorterRestoreWorkArray(Proj2Sorter sorter, size_t num, size_t size, voi
   return 0;
 }
 
-int Proj2SorterSort(Proj2Sorter sorter, size_t numKeysLocal, uint64_t *keys)
+int Proj2SorterSort(Proj2Sorter sorter, size_t numKeysLocal, int uniform, uint64_t *keys)
 {
   int size;
   int err;
 
   err = MPI_Comm_size(sorter->comm, &size); PROJ2CHK(err);
-  if (size == 1) {
-    err = Proj2SorterSortLocal(sorter, numKeysLocal, keys, PROJ2SORT_FORWARD); PROJ2CHK(err);
-  } else if ((1 << ((int) log2(size))) == size) {
-    err = Proj2SorterSortBitonic(sorter, numKeysLocal, keys); PROJ2CHK(err);
+  if (size == 1) { err = Proj2SorterSortLocal(sorter, numKeysLocal, keys, PROJ2SORT_FORWARD); PROJ2CHK(err);
+  } else if (uniform && (1 << ((int) log2(size))) == size) {
+    err = Proj2SorterSortBitonic(sorter, numKeysLocal, uniform, keys); PROJ2CHK(err);
   } else {
-    err = Proj2SorterSort_quicksort(sorter, numKeysLocal, keys); PROJ2CHK(err);
+    err = Proj2SorterSort_quicksort(sorter, numKeysLocal, uniform, keys); PROJ2CHK(err);
   }
 
   return 0;

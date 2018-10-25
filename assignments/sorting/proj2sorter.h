@@ -41,11 +41,12 @@ int Proj2SorterDestroy(Proj2Sorter *sorter);
  *                         in this object.  Defined in proj2sorter_impl.h, where
  *                         you can change the struct to include more data
  * \param[in] numKeysLocal The number of keys on this process.
+ * \param[in] uniform      The number of keys per process is uniform
  * \param[in/out] keys     The input array.  On output, should be globally
  *                         sorted in ascending order.
  * \return                 Non-zero if an error occured.
  */
-int Proj2SorterSort(Proj2Sorter sorter, size_t numKeysLocal, uint64_t *keys);
+int Proj2SorterSort(Proj2Sorter sorter, size_t numKeysLocal, int uniform, uint64_t *keys);
 
 /* Defined in local.c */
 /* This is the default local implementation of sorting:
@@ -69,7 +70,7 @@ int Proj2SorterSortLocal(Proj2Sorter sorter, size_t numKeysLocal, uint64_t *keys
  *                         PROJ2SORT_BACKWARD for descending.
  * \return                 Non-zero if an error occured.
  */
-int Proj2SorterSortBitonic(Proj2Sorter sorter, size_t numKeysLocal, uint64_t *keys);
+int Proj2SorterSortBitonic(Proj2Sorter sorter, size_t numKeysLocal, int uniform, uint64_t *keys);
 
 int Proj2SorterGetWorkArray(Proj2Sorter sorter, size_t num, size_t size, void *workArray);
 int Proj2SorterRestoreWorkArray(Proj2Sorter sorter, size_t num, size_t size, void *workArray);

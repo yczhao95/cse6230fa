@@ -88,7 +88,7 @@ static int uint64_sort_bitonic(Proj2Sorter sorter, size_t nkeys, uint64_t *keys,
   return 0;
 }
 
-int Proj2SorterSortBitonic(Proj2Sorter sorter, size_t nkeys, uint64_t *keys)
+int Proj2SorterSortBitonic(Proj2Sorter sorter, size_t nkeys, int uniform, uint64_t *keys)
 {
   MPI_Comm comm = sorter->comm;
   int      size, rank;
@@ -101,6 +101,7 @@ int Proj2SorterSortBitonic(Proj2Sorter sorter, size_t nkeys, uint64_t *keys)
   log2Size = (int) log2((double) size);
   /* Bitonic sort is designed for power of 2 number of processes */
   if (size != (1 << log2Size)) {PROJ2ERR(comm,1,"Cannot use bitonic sort on %d processes\n",size);}
+  if (!uniform) {PROJ2ERR(comm,1,"Cannot use bitonic sort on non-uniform distributions\n");}
   err = uint64_sort_bitonic(sorter, nkeys, keys, log2Size, rank, PROJ2SORT_FORWARD, 0); PROJ2CHK(err);
 
   return 0;
