@@ -106,6 +106,7 @@ IXPushPair(IX ix, int p1, int p2)
     memcpy(newpairs, ix->pairs, ix->curNx * sizeof (ix_pair));
     free(ix->pairs);
     ix->pairs = newpairs;
+    ix->maxNx = maxNx;
   }
   pair = &(ix->pairs[ix->curNx++]);
   pair->p[0] = p1;
