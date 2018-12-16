@@ -2,6 +2,7 @@
 MAKERULES=intel
 include Makefile.$(MAKERULES)
 CPPFLAGS = -I../../utils -I../../utils/tictoc
+COPTFLAGS = -O3
 DEFINES =
 RM = rm -f
 LIBS = -lm -lrt

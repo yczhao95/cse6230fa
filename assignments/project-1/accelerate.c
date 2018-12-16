@@ -27,7 +27,7 @@ AccelCreate(int Np, double L, double k, double r, int use_ix, Accel *accel)
   a->r  = r;
   a->use_ix = use_ix;
   if (use_ix) {
-    int boxdim = 4; /* how could we choose boxdim ? */
+    int boxdim = 12; /* how could we choose boxdim ? */
     int maxNx = Np; /* how should we estimate the maximum number of interactions? */
     err = IXCreate(L, boxdim, maxNx, &(a->ix));CHK(err);
   }
