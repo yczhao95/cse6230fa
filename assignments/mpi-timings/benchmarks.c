@@ -2,11 +2,10 @@
 #include <mpi.h>
 #include <stdio.h>
 #include <stdlib.h>
-
 #define MPI_CHK(err) if (err != MPI_SUCCESS) return err
 
 #define MPI_LOG(rank,...) if (!rank) {printf(__VA_ARGS__);fflush(stdout);}
-
+#define max(a,b) ((a) > (b) ? (a) : (b))
 int splitCommunicator(MPI_Comm comm, int firstCommSize, MPI_Comm *subComm_p)
 {
   /* TODO: split the communicator `comm` into one communicator for ranks
@@ -17,12 +16,18 @@ int splitCommunicator(MPI_Comm comm, int firstCommSize, MPI_Comm *subComm_p)
    * `VecGetGlobalSize_tree_subcomm()` in the file `dmv_global_size.c` in the
    * `notes/mpi/dmv` example.
    */
+	int err, rank, color;
+	err = MPI_Comm_rank(comm, &rank); MPI_CHK(err);
+	color = rank >= firstCommSize;
+	err = MPI_Comm_split(comm,color,firstCommSize,subComm_p); MPI_CHK(err);
   return 0;
 }
 
 int destroyCommunicator(MPI_Comm *subComm_p)
 {
   /* TODO: destroy the subcommunicator created in `splitCommunicator` */
+	int err;
+	err = MPI_Comm_free(subComm_p); MPI_CHK(err);
   return 0;
 }
 
@@ -30,6 +35,8 @@ int startTime(MPI_Comm comm, double *tic_p)
 {
   /* TODO: insert a barrier on `comm` to synchronize the processes */
   /* TODO: Record the MPI walltime in `tic_p` */
+	MPI_Barrier(comm);
+	*tic_p = MPI_Wtime();
   return 0;
 }
 
@@ -37,6 +44,7 @@ int stopTime(double tic_in, double *toc_p)
 {
   /* TODO: Get the elapsed MPI walltime since `tic_in`,
    * write the results in `toc_p` */
+	*toc_p = MPI_Wtime() - tic_in;
   return 0;
 }
 
@@ -44,6 +52,7 @@ int maxTime(MPI_Comm comm, double myTime, double *maxTime_p)
 {
   /* TODO: take the times from all processes and compute the maximum,
    * storing the result on process 0 */
+	*maxTime_p = max(*maxTime_p, myTime); 
   return 0;
 }
 
@@ -164,6 +173,7 @@ int main(int argc, char **argv)
            * first `numBytes` bytes of the `buffer` to the other subComm
            * processes. Store the results in the first `numBytes` bytes of the
            * `buffer` on the receiving processes. */
+				//	MPI_Bcast(buffer, numComm, MPI_BYTE, 0,comm);
         }
         err = stopTime(tic, &tic); MPI_CHK(err);
         if (t) {
