@@ -12,11 +12,13 @@ VectorCreate(int Np, Vector *vec)
   v->Np = Np;
 #if defined(VECTOR_AOS)
   {
+		printf("AOS\n");
     double *vals;
     err = safeMALLOC(Np * 3 * sizeof(double), &vals);CHK(err);
     v->v = (double (*) [3]) vals;
   }
 #else
+	printf("NonAOS\n");
   for (int d = 0; d < 3; d++) {
     err = safeMALLOC(Np * sizeof(double), &(v->v[d]));CHK(err);
   }

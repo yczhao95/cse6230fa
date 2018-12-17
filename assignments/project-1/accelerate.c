@@ -17,7 +17,7 @@ struct _accel_t
 int
 AccelCreate(int Np, double L, double k, double r, int use_ix, Accel *accel)
 {
-  int err;
+	int err;
   Accel a;
 
   err = safeMALLOC(sizeof(*a), &a);CHK(err);
@@ -27,13 +27,18 @@ AccelCreate(int Np, double L, double k, double r, int use_ix, Accel *accel)
   a->r  = r;
   a->use_ix = use_ix;
   if (use_ix) {
-    int boxdim = 12; /* how could we choose boxdim ? */
-    int maxNx = Np; /* how should we estimate the maximum number of interactions? */
+    int boxdim = L / (r * 2.); /* how could we choose boxdim ? */
+		double ptl_vol = (4./3.) * 3.1415926 * r*r*r;
+		double domain_vol = L*L*L;
+		//maxNx will always be Np since it's possible for all particles to be existing in one box
+		//an estimation would be
+    int maxNx =  Np * Np * 8 * ptl_vol / domain_vol / 2;/* how should we estimate the maximum number of interactions? */
+		printf("boxdim%d, maxNx%d",boxdim, maxNx);
     err = IXCreate(L, boxdim, maxNx, &(a->ix));CHK(err);
-  }
+	}
   else {
     a->ix = NULL;
-  }
+	}
   *accel = a;
   return 0;
 }
@@ -44,8 +49,9 @@ AccelDestroy(Accel *accel)
   int err;
 
   if ((*accel)->ix) {
-    err = IXDestroy(&((*accel)->ix));CHK(err);
-  }
+    err = IXDestroy(&((*accel)->ix));
+		CHK(err);
+	}
   free (*accel);
   *accel = NULL;
   return 0;
@@ -54,6 +60,7 @@ AccelDestroy(Accel *accel)
 static void
 accelerate_ix (Accel accel, Vector X, Vector U)
 {
+	int err;
   IX ix = accel->ix;
   int Np = X->Np;
   int Npairs;
@@ -61,26 +68,55 @@ accelerate_ix (Accel accel, Vector X, Vector U)
   double L = accel->L;
   double k = accel->k;
   double r = accel->r;
-
+  #pragma omp parallel for
   for (int i = 0; i < Np; i++) {
     for (int j = 0; j < 3; j++) {
       IDX(U,j,i) = 0.;
     }
   }
 
-  IXGetPairs (ix, X, 2.*r, &Npairs, &pairs);
+  IXGetPairs (ix, X, 2.*r, &Npairs, &pairs);	
+ /* 
+  #pragma omp parallel
+  {
+	Vector U_private;
+	VectorCreate(Np, &U_private);
+  #pragma omp for
+  for (int i = 0; i < Np; i++) {
+    for (int j = 0; j < 3; j++) {
+      IDX(U_private,j,i) = 0.;
+    }
+  }*/	
+	
+  //#pragma omp parallel for
   for (int p = 0; p < Npairs; p++) {
     int i = pairs[p].p[0];
     int j = pairs[p].p[1];
     double du[3];
-
     force (k, r, L, IDX(X,0,i), IDX(X,1,i), IDX(X,2,i), IDX(X,0,j), IDX(X,1,j), IDX(X,2,j), du);
-
     for (int d = 0; d < 3; d++) {
       IDX(U,d,i) += du[d];
-      IDX(U,d,j) -= du[d];
+			IDX(U,d,j) -= du[d];
+			//printf("i:%d,j:%di\n",i,j);
+			//printf("value:%f, %f\n", IDX(U_private,d,i), IDX(U_private,d,j));
     }
   }
+/* 
+	#pragma omp critical
+	for (int p = 0; p < Npairs; p++) {
+    int i = pairs[p].p[0];
+    int j = pairs[p].p[1];
+		for (int d = 0; d < 3; d++) {
+			printf("i:%d,j:%d, Np:%d\n",i,j, Np);
+			printf("value:%f, %f\n", IDX(U_private,d,i), IDX(U_private,d,j));
+			double pi = IDX(U_private,d,i);
+			double pj = IDX(U_private,d,j);
+			IDX(U,d,i) += pi;
+			IDX(U,d,j) += pj;
+		}
+	}*/
+  //VectorDestroy(&U_private);
+	//}
   IXRestorePairs (ix, X, 2.*r, &Npairs, &pairs);
 }
 

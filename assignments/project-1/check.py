@@ -42,7 +42,7 @@ if __name__ == "__main__":
             s_pro = r[0,:]*r[0,:] + r[1,:]*r[1,:] + r[2,:]*r[2,:]
             accum[interv-1] = accum[interv-1] + np.mean(s_pro)
             denom[interv-1] = denom[interv-1] + 1
-            X0[interv-1,:,:] = X[:,:]
+            X0[interv-1,:,:] = X[:,:] 
 
     out = accum / denom
     x = np.linspace(dt*Nint,dt*Nint*maxinterv,maxinterv)

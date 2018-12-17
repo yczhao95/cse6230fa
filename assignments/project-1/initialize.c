@@ -1,6 +1,5 @@
 
 #include "initialize.h"
-
 void
 initialize_positions (Vector X0, Vector X, double L, cse6230rand_t *rand)
 {

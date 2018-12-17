@@ -159,7 +159,6 @@ IXGetPairs(IX ix, Vector X, double r, int *Npairs, ix_pair **pairs)
   box    ***b = ix->boxes;
   int Np = X->Np;
   int err;
-
   if (r > boxwidth)
   {
     printf("interactions: radius %g is greater than box width %g\n", r, boxwidth);

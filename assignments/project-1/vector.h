@@ -1,6 +1,7 @@
 #if !defined(VECTOR_H)
 #define      VECTOR_H
 
+#define VECTOR_AOS
 typedef struct _vector *Vector;
 
 int VectorCreate(int Np, Vector *vec);
@@ -11,7 +12,6 @@ int VectorDestroy(Vector *vec);
 /* implement a vector as an array of structures */
 
 #define IDX(a,i,j) (a->v[j][i])
-
 struct _vector
 {
   int Np;
